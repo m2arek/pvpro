@@ -1,112 +1,209 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire Centrale Photovoltaïque</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-draw/1.0.4/leaflet.draw.css" />
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-draw/1.0.4/leaflet.draw.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #map {
-            width: 100%;
-            height: 400px;
-            margin-bottom: 20px;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        label {
-            font-weight: bold;
-        }
-        input, button {
-            padding: 10px;
-            font-size: 16px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FRH PRO formulaire</title>
+
+  <!-- Liens CSS pour Leaflet -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <!-- Leaflet Draw + GeometryUtil -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
+/>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <script src="https://unpkg.com/leaflet-geometryutil@0.9.3/dist/leaflet.geometryutil.min.js"></script>
+
+  <!-- Scripts JS pour Leaflet et html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+  <!-- Votre CSS -->
+  <style>
+    /* ... votre CSS inchangé ... */
+  </style>
 </head>
+
 <body>
-    <h1>Formulaire d'installation d'une centrale photovoltaïque</h1>
-    <form id="solarForm">
-        <label for="address">Adresse :</label>
-        <input type="text" id="address" name="address" placeholder="Entrez l'adresse" required>
+  <div class="container">
+    <h1 class="page-title">Formulaire pour saisie données FRH PRO</h1>
 
-        <label for="consumption">Consommation en kWh :</label>
-        <input type="number" id="consumption" name="consumption" placeholder="Entrez la consommation annuelle" required>
-
-        <div id="map"></div>
-
-        <button type="button" onclick="saveAsPDF()">Exporter en PDF</button>
+    <!-- (1) Formulaire de recherche d'adresse -->
+    <form id="addressForm" onsubmit="return searchAddress(event);">
+      <!-- ... -->
     </form>
 
-    <script>
-        let map = L.map('map').setView([48.8566, 2.3522], 10); // Coordonnées par défaut (Paris)
+    <!-- (2) Boutons dessin -->
+    <button id="toggleDrawingButton">Activer le dessin (main levée)</button>
+    <button id="toggleMeasureButton">Mesurer une surface</button> <!-- NOUVEAU -->
 
-        // Ajouter une couche OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+    <!-- (3) Zone carte + canvas -->
+    <div id="map-container">
+      <div id="map"></div>
+      <canvas id="drawingCanvas"></canvas>
+    </div>
 
-        // Ajouter les outils de dessin
-        const drawnItems = new L.FeatureGroup();
-        map.addLayer(drawnItems);
+    <!-- (4) Formulaire principal -->
+    <form id="userForm">
+      <!-- ... -->
+      <!-- Champ à remplir automatiquement -->
+      <label for="Surface toiture">Surface toiture (m²) :</label>
+      <input
+        type="number"
+        id="Surface toiture"
+        name="Surface toiture"
+        placeholder="Entrez la surface de la toiture"
+      />
+      <!-- ... -->
+    </form>
 
-        const drawControl = new L.Control.Draw({
-            edit: {
-                featureGroup: drawnItems
-            },
-            draw: {
-                polygon: true,
-                marker: false,
-                polyline: false,
-                circle: false,
-                circlemarker: false,
-                rectangle: true
-            }
-        });
-        map.addControl(drawControl);
+    <!-- (5) Boutons PDF + JSON -->
+    <div style="margin-bottom:15px;">
+      <!-- ... -->
+    </div>
+  </div>
 
-        let selectedShape = null;
+<script>
+  /***************************************************
+   * 1) INITIALISER LA CARTE LEAFLET
+   ***************************************************/
+  const map = L.map("map").setView([48.8566, 2.3522], 18); // Paris par défaut
+  const tileLayer = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+    maxZoom: 20,
+    subdomains: ["mt0", "mt1", "mt2", "mt3"],
+    attribution: "© Google",
+  });
+  tileLayer.addTo(map);
 
-        map.on(L.Draw.Event.CREATED, function(event) {
-            const layer = event.layer;
-            drawnItems.clearLayers(); // Supprime les anciennes formes
-            drawnItems.addLayer(layer);
-            selectedShape = layer;
-        });
+  /***************************************************
+   * 2) DESSIN LIBRE SUR CANVAS (main levée)
+   ***************************************************/
+  const drawingCanvas = document.getElementById("drawingCanvas");
+  const ctx = drawingCanvas.getContext("2d");
+  const AdresseField = document.getElementById("Adresse");
 
-        function saveAsPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+  let drawing = false;
+  let drawingEnabled = false;
 
-            const address = document.getElementById('address').value;
-            const consumption = document.getElementById('consumption').value;
+  // Bouton pour dessin libre
+  const toggleDrawingButton = document.getElementById("toggleDrawingButton");
+  toggleDrawingButton.addEventListener("click", () => {
+    drawingEnabled = !drawingEnabled;
+    drawingCanvas.style.pointerEvents = drawingEnabled ? "auto" : "none";
+    toggleDrawingButton.textContent = drawingEnabled
+      ? "Désactiver le dessin"
+      : "Activer le dessin (main levée)";
+  });
 
-            doc.text("Formulaire d'installation photovoltaïque", 10, 10);
-            doc.text(`Adresse : ${address}`, 10, 20);
-            doc.text(`Consommation en kWh : ${consumption}`, 10, 30);
+  // Adapter la taille du canvas
+  function resizeCanvas() {
+    drawingCanvas.width = drawingCanvas.offsetWidth;
+    drawingCanvas.height = drawingCanvas.offsetHeight;
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 
-            if (selectedShape) {
-                const latLngs = selectedShape.getLatLngs()[0].map(coord => {
-                    return `(${coord.lat.toFixed(6)}, ${coord.lng.toFixed(6)})`;
-                });
-                doc.text("Zone sélectionnée :", 10, 40);
-                doc.text(latLngs.join("; "), 10, 50);
-            } else {
-                doc.text("Aucune zone sélectionnée.", 10, 40);
-            }
+  // Gestion souris pour dessiner
+  drawingCanvas.addEventListener("mousedown", (event) => {
+    if (!drawingEnabled) return;
+    drawing = true;
+    ctx.beginPath();
+    const rect = drawingCanvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    ctx.moveTo(x, y);
+  });
 
-            doc.save("formulaire_photovoltaique.pdf");
-        }
-    </script>
+  drawingCanvas.addEventListener("mouseup", () => {
+    if (!drawingEnabled) return;
+    drawing = false;
+    ctx.beginPath();
+  });
+
+  drawingCanvas.addEventListener("mousemove", (event) => {
+    if (!drawing || !drawingEnabled) return;
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "red";
+
+    const rect = drawingCanvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  });
+
+  /***************************************************
+   * A) AJOUT DES OUTILS DE MESURE (Leaflet Draw)
+   ***************************************************/
+  const drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
+
+  const drawControl = new L.Control.Draw({
+    draw: {
+      marker: false,
+      polyline: false,
+      circle: false,
+      circlemarker: false,
+      polygon: true,
+      rectangle: true
+    },
+    edit: {
+      featureGroup: drawnItems
+    }
+  });
+
+  let measureActive = false;
+  const measureButton = document.getElementById('toggleMeasureButton');
+  measureButton.addEventListener('click', () => {
+    measureActive = !measureActive;
+    if (measureActive) {
+      map.addControl(drawControl);
+      measureButton.textContent = 'Terminer la mesure';
+    } else {
+      map.removeControl(drawControl);
+      measureButton.textContent = 'Mesurer une surface';
+    }
+  });
+
+  // Lorsqu'une forme est créée (polygone ou rectangle)
+  map.on(L.Draw.Event.CREATED, function (e) {
+    const layer = e.layer;
+    drawnItems.addLayer(layer);
+
+    if (e.layerType === 'polygon' || e.layerType === 'rectangle') {
+      // Récupérer les LatLng
+      const latLngs = layer.getLatLngs()[0]; 
+      const area = L.GeometryUtil.geodesicArea(latLngs); // en m²
+      const areaRounded = Math.round(area * 100) / 100;
+
+      alert(`Surface mesurée : ${areaRounded} m²`);
+      document.getElementById("Surface toiture").value = areaRounded;
+    }
+  });
+
+  /***************************************************
+   * 3) RECHERCHE D'ADRESSE
+   ***************************************************/
+  async function searchAddress(event) {
+    // ... votre code inchangé ...
+  }
+
+  /***************************************************
+   * 4) EXPORT PDF (2 PAGES)
+   ***************************************************/
+  function saveMapAsPDF() {
+    // ... votre code inchangé ...
+  }
+
+  /***************************************************
+   * 5) SAUVEGARDER / CHARGER JSON
+   ***************************************************/
+  // ... votre code inchangé ...
+</script>
 </body>
 </html>
