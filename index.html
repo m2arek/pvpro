@@ -3,23 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO formulaire</title>
+  <title>55FRH PRO formulaire</title>
 
-  <!-- Leaflet CSS -->
+  <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
 
-  <!-- Leaflet Draw + GeometryUtil -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
-/>
-  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
-  <script src="https://unpkg.com/leaflet-geometryutil@0.9.3/dist/leaflet.geometryutil.min.js"></script>
+  <!-- (2) Leaflet Draw + GeometryUtil CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
 
-  <!-- Leaflet JS -->
+  <!-- (3) Leaflet JS -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- html2canvas et jsPDF pour export PDF -->
+  <!-- (4) Leaflet Draw JS -->
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+
+  <!-- (5) GeometryUtil (pour la surface) -->
+  <script src="https://unpkg.com/leaflet-geometryutil@0.9.3/dist/leaflet.geometryutil.min.js"></script>
+
+  <!-- (6) html2canvas + jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 
@@ -148,7 +149,7 @@
 
     /* Bouton "Activer le dessin" */
     #toggleDrawingButton {
-      float: right; 
+      float: right;
     }
 
     /* ------------------------------
@@ -167,22 +168,21 @@
       width: 100%;
       height: 100%;
     }
+
+    /* Le canvas de dessin libre */
     #drawingCanvas {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 1000; /* Canvas = 1000 */
+      z-index: 1000; /* Le canvas */
       pointer-events: none; /* Par défaut, n'intercepte pas les événements */
     }
 
-    /*
-      CORRECTION: Forcer la barre d'outils Leaflet Draw
-      à être au-dessus du calque normal
-    */
+    /* Forcer la barre d'outils de Leaflet Draw au-dessus du canvas */
     .leaflet-draw {
-      z-index: 1500 !important; /* Au-dessus du canvas */
+      z-index: 1500 !important;
     }
 
     /* ------------------------------
@@ -251,7 +251,7 @@
   <div class="container">
     <h1 class="page-title">Formulaire pour saisie données FRH PRO</h1>
 
-    <!-- 1) Formulaire de recherche d'adresse -->
+    <!-- (1) Formulaire de recherche d'adresse -->
     <form id="addressForm" onsubmit="return searchAddress(event);">
       <label for="address">Adresse :</label>
       <input
@@ -264,17 +264,17 @@
       <button type="submit">Rechercher</button>
     </form>
 
-    <!-- 2) Boutons dessin -->
+    <!-- (2) Boutons dessin -->
     <button id="toggleDrawingButton">Activer le dessin (main levée)</button>
     <button id="toggleMeasureButton">Mesurer une surface</button>
 
-    <!-- 3) Zone carte + canvas -->
+    <!-- (3) Zone carte + canvas -->
     <div id="map-container">
       <div id="map"></div>
       <canvas id="drawingCanvas"></canvas>
     </div>
 
-    <!-- 4) Formulaire principal -->
+    <!-- (4) Formulaire principal -->
     <form id="userForm">
 
       <!-- 4.1) Informations société -->
@@ -551,7 +551,7 @@
       </div>
     </form>
 
-    <!-- 5) Boutons PDF + gestion JSON -->
+    <!-- (5) Boutons PDF + gestion JSON -->
     <div style="margin-bottom:15px;">
       <button onclick="saveMapAsPDF()">Exporter en PDF</button>
       <button id="saveToFile">Télécharger les données</button>
@@ -656,30 +656,27 @@
     measureButton.addEventListener('click', () => {
       measureActive = !measureActive;
       if (measureActive) {
+        // => On ajoute le contrôle sur la carte
         map.addControl(drawControl);
         measureButton.textContent = 'Terminer la mesure';
       } else {
+        // => On enlève le contrôle
         map.removeControl(drawControl);
         measureButton.textContent = 'Mesurer une surface';
       }
     });
 
-    // CORRECTION : Récupérer les sommets pour polygone ET rectangle
+    // Calcul de surface (rectangle ou polygone)
     map.on(L.Draw.Event.CREATED, function (e) {
       const layer = e.layer;
       drawnItems.addLayer(layer);
 
       if (e.layerType === 'polygon' || e.layerType === 'rectangle') {
-        // Dans Leaflet, un rectangle est aussi un Polygone
-        // Récupération du 1er anneau (latLngs[0])
+        // Récupération du 1er anneau (rectangle = polygone à 4 sommets)
         let latLngs = layer.getLatLngs();
-
-        // Dans le cas d'un polygone, latLngs[0] est le tableau de sommets.
-        // Dans le cas rectangle, latLngs[0] existe également
         if (Array.isArray(latLngs[0])) {
           latLngs = latLngs[0];
         }
-
         const area = L.GeometryUtil.geodesicArea(latLngs); // en m²
         const areaRounded = Math.round(area * 100) / 100;
 
