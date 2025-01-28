@@ -1,17 +1,3 @@
-
-Bloc repliable et tableau de consommation mensuelle
-Réflexion pendant 8m 5s
-Lorsque votre bloc “Consommation mensuelle” est replié par défaut et contient un document.write(...), le navigateur n’insère pas correctement les 12 lignes de mois (celles-ci peuvent ne pas apparaître ou être écrasées).
-En effet, document.write() n’est pas recommandé dans un contenu dynamique ou masqué ; il peut provoquer la réécriture du document ou s’exécuter au mauvais moment.
-
-La solution est d’insérer ces lignes dynamiquement au chargement de la page (sans document.write).
-Ci-dessous, vous trouverez votre code complet (inchangé dans ses fonctionnalités), avec :
-
-Tous les blocs repliables par défaut (comme demandé).
-Le tableau “Consommation mensuelle” affichant bien les 12 lignes de mois, grâce à un <tbody id="consumptionTableBody"> et un script qui crée les lignes après le chargement du DOM.
-Aucune fonctionnalité (recherche d’adresse, dessin, PDF, JSON, etc.) n’a été supprimée.
-html
-Copier
 <!DOCTYPE html>
 <html lang="fr">
 <head>
