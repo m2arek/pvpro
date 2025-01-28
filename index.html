@@ -148,7 +148,7 @@
 
     /* Bouton "Activer le dessin" */
     #toggleDrawingButton {
-      float: right;
+      float: right; 
     }
 
     /* ------------------------------
@@ -173,8 +173,16 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 1000;
+      z-index: 1000; /* Canvas = 1000 */
       pointer-events: none; /* Par défaut, n'intercepte pas les événements */
+    }
+
+    /*
+      CORRECTION: Forcer la barre d'outils Leaflet Draw
+      à être au-dessus du calque normal
+    */
+    .leaflet-draw {
+      z-index: 1500 !important; /* Au-dessus du canvas */
     }
 
     /* ------------------------------
@@ -656,17 +664,22 @@
       }
     });
 
-    // CORRECTION : Gérer polygones ET rectangles
+    // CORRECTION : Récupérer les sommets pour polygone ET rectangle
     map.on(L.Draw.Event.CREATED, function (e) {
       const layer = e.layer;
       drawnItems.addLayer(layer);
 
       if (e.layerType === 'polygon' || e.layerType === 'rectangle') {
-        // Récupérer les coord. (premier anneau)
+        // Dans Leaflet, un rectangle est aussi un Polygone
+        // Récupération du 1er anneau (latLngs[0])
         let latLngs = layer.getLatLngs();
+
+        // Dans le cas d'un polygone, latLngs[0] est le tableau de sommets.
+        // Dans le cas rectangle, latLngs[0] existe également
         if (Array.isArray(latLngs[0])) {
-          latLngs = latLngs[0]; // On prend le 1er tableau de sommets
+          latLngs = latLngs[0];
         }
+
         const area = L.GeometryUtil.geodesicArea(latLngs); // en m²
         const areaRounded = Math.round(area * 100) / 100;
 
