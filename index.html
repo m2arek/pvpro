@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FRH PRO </title>
+  <title>FRH PRO formulaire</title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -71,7 +71,7 @@
     }
 
     /* ------------------------------
-       s
+       Formulaires
     -------------------------------- */
     form {
       display: flex;
@@ -249,9 +249,9 @@
 
 <body>
   <div class="container">
-    <h1 class="page-title"> 45pour saisie données FRH PRO</h1>
+    <h1 class="page-title">Le Formulaire pour saisie données FRH PRO</h1>
 
-    <!-- (1)  de recherche d'adresse -->
+    <!-- (1) Formulaire de recherche d'adresse -->
     <form id="addressForm" onsubmit="return searchAddress(event);">
       <label for="address">Adresse :</label>
       <input
@@ -274,7 +274,7 @@
       <canvas id="drawingCanvas"></canvas>
     </div>
 
-    <!-- (4)  principal -->
+    <!-- (4) Formulaire principal -->
     <form id="userForm">
 
       <!-- 4.1) Informations société -->
@@ -572,6 +572,9 @@
     });
     tileLayer.addTo(map);
 
+    // VARIABLE GLOBALE POUR LE MARQUEUR DE RECHERCHE
+    let searchMarker = null;
+
     /***************************************************
      * 2) DESSIN LIBRE SUR CANVAS (main levée)
      ***************************************************/
@@ -686,7 +689,7 @@
     });
 
     /***************************************************
-     * 3) RECHERCHE D'ADRESSE (Nominatim)
+     * 3) RECHERCHE D'ADRESSE (Nominatim) + MARKER
      ***************************************************/
     async function searchAddress(event) {
       event.preventDefault();
@@ -701,7 +704,16 @@
         if (data.length > 0) {
           const { lat, lon } = data[0];
           map.setView([lat, lon], 18);
-          AdresseField.value = address; // Sauvegarder l'adresse dans le 
+          AdresseField.value = address; // Sauvegarder l'adresse dans le formulaire
+
+          // SUPPRIMER L'ANCIEN MARQUEUR SI EXISTE
+          if (searchMarker) {
+            map.removeLayer(searchMarker);
+          }
+          // CREER UN NOUVEAU MARQUEUR
+          searchMarker = L.marker([lat, lon]).addTo(map);
+          searchMarker.bindPopup(`Adresse trouvée : ${address}`).openPopup();
+
         } else {
           alert("Adresse introuvable.");
         }
@@ -730,7 +742,7 @@
         // Ajout de l'image (carte + dessin) en page 1
         pdf.addImage(mapImage, "PNG", 10, 10, 190, 100);
 
-        // Ajout des champs du  (page 1)
+        // Ajout des champs du formulaire (page 1)
         let yOffset = 120;
         const formData = new FormData(userForm);
 
@@ -758,8 +770,8 @@
           // 4) Sauvegarde du PDF
           const companyName = document.getElementById("companyName").value;
           const pdfFileName = companyName
-            ? `_${companyName}.pdf`
-            : ".pdf";
+            ? `Formulaire_${companyName}.pdf`
+            : "Formulaire.pdf";
           pdf.save(pdfFileName);
         });
       });
@@ -802,8 +814,8 @@
       formObject["drawnShapes"] = shapesGeoJSON;
 
       // (C) Nom de fichier dynamique
-      const companyName = formObject["companyName"] || "";
-      const fileName = `_${companyName}.json`;
+      const companyName = formObject["companyName"] || "Formulaire";
+      const fileName = `Formulaire_${companyName}.json`;
 
       // (D) Génération du fichier JSON
       const jsonString = JSON.stringify(formObject, null, 2);
