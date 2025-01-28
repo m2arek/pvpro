@@ -57,7 +57,7 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
-      background: #fff;
+      background: #fff; /* Fond blanc */
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       border-radius: 5px;
     }
@@ -98,6 +98,7 @@
       box-sizing: border-box;
       margin-top: 5px;
     }
+
     input[type="text"]:focus,
     input[type="number"]:focus,
     input[type="time"]:focus,
@@ -117,19 +118,12 @@
       padding: 15px;
       border-radius: 5px;
       border: 1px solid #ddd;
-      margin-bottom: 10px;
     }
 
     .form-section h3 {
       margin-top: 0;
       font-size: 18px;
       color: #555;
-      cursor: pointer;   /* bloc repliable */
-      user-select: none;
-    }
-    .collapsible-content {
-      display: none; /* par défaut replié */
-      margin-top: 10px;
     }
 
     /* ------------------------------
@@ -177,7 +171,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 1000;
+      z-index: 1000; /* Le canvas */
       pointer-events: none;
     }
     .leaflet-draw {
@@ -244,7 +238,7 @@
 
 <body>
   <div class="container">
-    <h1 class="page-title">Formulaire pour la saisie des données FRH PRO</h1>
+    <h1 class="page-title">Formulaire pour saisie données FRH PRO</h1>
 
     <!-- (1) Formulaire de recherche d'adresse -->
     <form id="addressForm" onsubmit="return searchAddress(event);">
@@ -271,340 +265,320 @@
 
     <!-- (4) Formulaire principal -->
     <form id="userForm">
-
       <!-- BLOC "Données irradiation" -->
       <div class="form-section">
         <h3>Données irradiation</h3>
-        <div class="collapsible-content">
-          <label for="latitudeIrr">Latitude :</label>
-          <input type="text" id="latitudeIrr" name="latitudeIrr" readonly />
 
-          <label for="longitudeIrr">Longitude :</label>
-          <input type="text" id="longitudeIrr" name="longitudeIrr" readonly />
+        <label for="latitudeIrr">Latitude :</label>
+        <input type="text" id="latitudeIrr" name="latitudeIrr" readonly />
 
-          <label for="orientationIrr">Orientation :</label>
-          <select id="orientationIrr" name="orientationIrr">
-            <option value="0">SUD (0°)</option>
-            <option value="-90">EST (-90°)</option>
-            <option value="90">OUEST (90°)</option>
-            <option value="-45">SUD-EST (-45°)</option>
-            <option value="45">SUD-OUEST (45°)</option>
-          </select>
+        <label for="longitudeIrr">Longitude :</label>
+        <input type="text" id="longitudeIrr" name="longitudeIrr" readonly />
 
-          <label for="productible">Productible :</label>
-          <input type="text" id="productible" name="productible" placeholder="kWh/kWc/an" readonly/>
+        <label for="orientationIrr">Orientation :</label>
+        <select id="orientationIrr" name="orientationIrr">
+          <option value="0">SUD (0°)</option>
+          <option value="-90">EST (-90°)</option>
+          <option value="90">OUEST (90°)</option>
+          <option value="-45">SUD-EST (-45°)</option>
+          <option value="45">SUD-OUEST (45°)</option>
+        </select>
 
-          <!-- Bouton calcul productible -->
-          <button type="button" id="calculateIrrButton">Calculer le productible</button>
-        </div>
+        <label for="productible">Productible :</label>
+        <input type="text" id="productible" name="productible" placeholder="kWh/kWc/an" readonly/>
+
+        <!-- Bouton calcul productible -->
+        <button type="button" id="calculateIrrButton">Calculer le productible</button>
       </div>
 
       <!-- BLOC "Potentiel de production" -->
       <div class="form-section">
         <h3>Potentiel de production</h3>
-        <div class="collapsible-content">
-          <label for="exclusionPercent">% surface exclusion :</label>
-          <input
-            type="number"
-            id="exclusionPercent"
-            name="exclusionPercent"
-            value="0"
-            placeholder="Ex: 10"
-          />
 
-          <label for="puissancePanneau">Puissance du panneau :</label>
-          <select id="puissancePanneau" name="puissancePanneau">
-            <option value="420" selected>420 Wc</option>
-            <option value="440">440 Wc</option>
-            <option value="500">500 Wc</option>
-          </select>
+        <label for="exclusionPercent">% surface exclusion :</label>
+        <input
+          type="number"
+          id="exclusionPercent"
+          name="exclusionPercent"
+          value="0"
+          placeholder="Ex: 10"
+        />
 
-          <label for="nombrePVMax">Nombre de PV max :</label>
-          <input type="text" id="nombrePVMax" name="nombrePVMax" readonly />
+        <label for="puissancePanneau">Puissance du panneau :</label>
+        <select id="puissancePanneau" name="puissancePanneau">
+          <option value="420" selected>420 Wc</option>
+          <option value="440">440 Wc</option>
+          <option value="500">500 Wc</option>
+        </select>
 
-          <label for="puissanceMaxPV">Puissance max PV (kWc) :</label>
-          <input type="text" id="puissanceMaxPV" name="puissanceMaxPV" readonly />
+        <label for="nombrePVMax">Nombre de PV max :</label>
+        <input type="text" id="nombrePVMax" name="nombrePVMax" readonly />
 
-          <label for="productionInstall">Production en kWh de l'installation :</label>
-          <input type="text" id="productionInstall" name="productionInstall" readonly />
-        </div>
+        <label for="puissanceMaxPV">Puissance max PV (kWc) :</label>
+        <input type="text" id="puissanceMaxPV" name="puissanceMaxPV" readonly />
+
+        <label for="productionInstall">Production en kWh de l'installation :</label>
+        <input type="text" id="productionInstall" name="productionInstall" readonly />
       </div>
 
       <!-- 4.1) Informations société -->
       <div class="form-section">
         <h3>Informations sur la société</h3>
-        <div class="collapsible-content">
-          <label for="Adresse">Adresse entrée :</label>
-          <input type="text" id="Adresse" name="Adresse" readonly />
+        <label for="Adresse">Adresse entrée :</label>
+        <input type="text" id="Adresse" name="Adresse" readonly />
 
-          <label for="companyName">Société :</label>
-          <input
-            type="text"
-            id="companyName"
-            name="companyName"
-            placeholder="Entrez le nom de la société"
-          />
+        <label for="companyName">Société :</label>
+        <input
+          type="text"
+          id="companyName"
+          name="companyName"
+          placeholder="Entrez le nom de la société"
+        />
 
-          <label for="activity">Activité :</label>
-          <input
-            type="text"
-            id="activity"
-            name="activity"
-            placeholder="Entrez l'activité"
-          />
+        <label for="activity">Activité :</label>
+        <input
+          type="text"
+          id="activity"
+          name="activity"
+          placeholder="Entrez l'activité"
+        />
 
-          <label for="Nom">Nom :</label>
-          <input
-            type="text"
-            id="Nom"
-            name="Nom"
-            placeholder="Entrez le nom"
-          />
+        <label for="Nom">Nom :</label>
+        <input
+          type="text"
+          id="Nom"
+          name="Nom"
+          placeholder="Entrez le nom"
+        />
 
-          <label for="Prénom">Prénom :</label>
-          <input
-            type="text"
-            id="Prénom"
-            name="Prénom"
-            placeholder="Entrez le prénom"
-          />
+        <label for="Prénom">Prénom :</label>
+        <input
+          type="text"
+          id="Prénom"
+          name="Prénom"
+          placeholder="Entrez le prénom"
+        />
 
-          <label for="Statut">Statut :</label>
-          <input
-            type="text"
-            id="Statut"
-            name="Statut"
-            placeholder="Statut dans ste"
-          />
-        </div>
+        <label for="Statut">Statut :</label>
+        <input
+          type="text"
+          id="Statut"
+          name="Statut"
+          placeholder="Statut dans ste"
+        />
       </div>
 
       <!-- 4.2) Informations toiture -->
       <div class="form-section">
         <h3>Informations sur la toiture</h3>
-        <div class="collapsible-content">
-          <label for="Surface toiture">Surface toiture (m²) :</label>
-          <input
-            type="number"
-            id="Surface toiture"
-            name="Surface toiture"
-            placeholder="Entrez la surface de la toiture"
-          />
 
-          <label for="Type de toiture">Type de toiture :</label>
-          <select id="Type de toiture" name="Type de toiture">
-            <option value="" disabled selected>Choisissez un Type de toiture</option>
-            <option value="2 pentes">2 pentes</option>
-            <option value="1 pente">1 pente</option>
-            <option value="Toit plat">Toit plat</option>
-          </select>
+        <label for="Surface toiture">Surface toiture (m²) :</label>
+        <input
+          type="number"
+          id="Surface toiture"
+          name="Surface toiture"
+          placeholder="Entrez la surface de la toiture"
+        />
 
-          <label for="Pente toiture">Pente toiture (°) :</label>
-          <input
-            type="number"
-            id="Pente toiture"
-            name="Pente toiture"
-            placeholder="Pente de la toiture"
-          />
+        <label for="Type de toiture">Type de toiture :</label>
+        <select id="Type de toiture" name="Type de toiture">
+          <option value="" disabled selected>Choisissez un Type de toiture</option>
+          <option value="2 pentes">2 pentes</option>
+          <option value="1 pente">1 pente</option>
+          <option value="Toit plat">Toit plat</option>
+        </select>
 
-          <label for="Type de couverture">Type de couverture :</label>
-          <select id="Type de couverture" name="Type de couverture">
-            <option value="" disabled selected>Choisissez un type de couverture</option>
-            <option value="Bacs acier">Bacs acier</option>
-            <option value="Fibro ciment">Fibro ciment</option>
-            <option value="Tuiles">Tuiles</option>
-            <option value="Béton">Béton</option>
-          </select>
+        <label for="Pente toiture">Pente toiture (°) :</label>
+        <input
+          type="number"
+          id="Pente toiture"
+          name="Pente toiture"
+          placeholder="Pente de la toiture"
+        />
 
-          <label for="Type de charpente">Type de charpente :</label>
-          <select id="Type de charpente" name="Type de charpente">
-            <option value="" disabled selected>Choisissez un type de charpente</option>
-            <option value="Metallique">Métallique</option>
-            <option value="Bois">Bois</option>
-          </select>
+        <label for="Type de couverture">Type de couverture :</label>
+        <select id="Type de couverture" name="Type de couverture">
+          <option value="" disabled selected>Choisissez un type de couverture</option>
+          <option value="Bacs acier">Bacs acier</option>
+          <option value="Fibro ciment">Fibro ciment</option>
+          <option value="Tuiles">Tuiles</option>
+          <option value="Béton">Béton</option>
+        </select>
 
-          <label for="Translucides">Présence de translucides :</label>
-          <select id="Translucides" name="Translucides">
-            <option value="" disabled selected>Presence de translucides o/n</option>
-            <option value="Oui">Oui</option>
-            <option value="Non">Non</option>
-          </select>
+        <label for="Type de charpente">Type de charpente :</label>
+        <select id="Type de charpente" name="Type de charpente">
+          <option value="" disabled selected>Choisissez un type de charpente</option>
+          <option value="Metallique">Métallique</option>
+          <option value="Bois">Bois</option>
+        </select>
 
-          <label for="Couvrir Translucides">Couvrir Translucides :</label>
-          <select id="Couvrir Translucides" name="Couvrir Translucides">
-            <option value="" disabled selected>Couvrir Translucides o/n</option>
-            <option value="Oui">Oui</option>
-            <option value="Non">Non</option>
-          </select>
-        </div>
+        <label for="Translucides">Présence de translucides :</label>
+        <select id="Translucides" name="Translucides">
+          <option value="" disabled selected>Presence de translucides o/n</option>
+          <option value="Oui">Oui</option>
+          <option value="Non">Non</option>
+        </select>
+
+        <label for="Couvrir Translucides">Couvrir Translucides :</label>
+        <select id="Couvrir Translucides" name="Couvrir Translucides">
+          <option value="" disabled selected>Couvrir Translucides o/n</option>
+          <option value="Oui">Oui</option>
+          <option value="Non">Non</option>
+        </select>
       </div>
 
       <!-- 4.3) Periodes d'utilisation -->
       <div class="form-section">
         <h3>Periodes d'utilisation</h3>
-        <div class="collapsible-content">
-          <h4>Mois de congés</h4>
-          <div class="checkbox-grid">
-            <label><input type="checkbox" name="moisConges[]" value="Janvier" />Janvier</label>
-            <label><input type="checkbox" name="moisConges[]" value="Février" />Février</label>
-            <label><input type="checkbox" name="moisConges[]" value="Mars" />Mars</label>
-            <label><input type="checkbox" name="moisConges[]" value="Avril" />Avril</label>
-            <label><input type="checkbox" name="moisConges[]" value="Mai" />Mai</label>
-            <label><input type="checkbox" name="moisConges[]" value="Juin" />Juin</label>
-            <label><input type="checkbox" name="moisConges[]" value="Juillet" />Juillet</label>
-            <label><input type="checkbox" name="moisConges[]" value="Août" />Août</label>
-            <label><input type="checkbox" name="moisConges[]" value="Septembre" />Septembre</label>
-            <label><input type="checkbox" name="moisConges[]" value="Octobre" />Octobre</label>
-            <label><input type="checkbox" name="moisConges[]" value="Novembre" />Novembre</label>
-            <label><input type="checkbox" name="moisConges[]" value="Décembre" />Décembre</label>
-          </div>
 
-          <h4>Jours de congés</h4>
-          <div class="checkbox-grid">
-            <label><input type="checkbox" name="joursConges[]" value="Lundi" />Lundi</label>
-            <label><input type="checkbox" name="joursConges[]" value="Mardi" />Mardi</label>
-            <label><input type="checkbox" name="joursConges[]" value="Mercredi" />Mercredi</label>
-            <label><input type="checkbox" name="joursConges[]" value="Jeudi" />Jeudi</label>
-            <label><input type="checkbox" name="joursConges[]" value="Vendredi" />Vendredi</label>
-            <label><input type="checkbox" name="joursConges[]" value="Samedi" />Samedi</label>
-            <label><input type="checkbox" name="joursConges[]" value="Dimanche" />Dimanche</label>
-          </div>
-
-          <label for="heureDebut">Heure début travail :</label>
-          <input type="time" id="heureDebut" name="heureDebut" />
-
-          <label for="heureFin">Heure fin :</label>
-          <input type="time" id="heureFin" name="heureFin" />
-
-          <label for="Puissance compteur">Puissance compteur (Kva) :</label>
-          <input
-            type="number"
-            id="Puissance compteur"
-            name="Puissance compteur"
-            placeholder="Puissance compteur"
-          />
+        <h4>Mois de congés</h4>
+        <div class="checkbox-grid">
+          <label><input type="checkbox" name="moisConges[]" value="Janvier" />Janvier</label>
+          <label><input type="checkbox" name="moisConges[]" value="Février" />Février</label>
+          <label><input type="checkbox" name="moisConges[]" value="Mars" />Mars</label>
+          <label><input type="checkbox" name="moisConges[]" value="Avril" />Avril</label>
+          <label><input type="checkbox" name="moisConges[]" value="Mai" />Mai</label>
+          <label><input type="checkbox" name="moisConges[]" value="Juin" />Juin</label>
+          <label><input type="checkbox" name="moisConges[]" value="Juillet" />Juillet</label>
+          <label><input type="checkbox" name="moisConges[]" value="Août" />Août</label>
+          <label><input type="checkbox" name="moisConges[]" value="Septembre" />Septembre</label>
+          <label><input type="checkbox" name="moisConges[]" value="Octobre" />Octobre</label>
+          <label><input type="checkbox" name="moisConges[]" value="Novembre" />Novembre</label>
+          <label><input type="checkbox" name="moisConges[]" value="Décembre" />Décembre</label>
         </div>
+
+        <h4>Jours de congés</h4>
+        <div class="checkbox-grid">
+          <label><input type="checkbox" name="joursConges[]" value="Lundi" />Lundi</label>
+          <label><input type="checkbox" name="joursConges[]" value="Mardi" />Mardi</label>
+          <label><input type="checkbox" name="joursConges[]" value="Mercredi" />Mercredi</label>
+          <label><input type="checkbox" name="joursConges[]" value="Jeudi" />Jeudi</label>
+          <label><input type="checkbox" name="joursConges[]" value="Vendredi" />Vendredi</label>
+          <label><input type="checkbox" name="joursConges[]" value="Samedi" />Samedi</label>
+          <label><input type="checkbox" name="joursConges[]" value="Dimanche" />Dimanche</label>
+        </div>
+
+        <label for="heureDebut">Heure début travail :</label>
+        <input type="time" id="heureDebut" name="heureDebut" />
+
+        <label for="heureFin">Heure fin :</label>
+        <input type="time" id="heureFin" name="heureFin" />
+
+        <label for="Puissance compteur">Puissance compteur (Kva) :</label>
+        <input
+          type="number"
+          id="Puissance compteur"
+          name="Puissance compteur"
+          placeholder="Puissance compteur"
+        />
       </div>
 
       <!-- 4.4) Tableau de consommation mensuelle -->
       <div id="consumptionTableContainer" class="form-section">
         <h3>Consommation mensuelle</h3>
-        <div class="collapsible-content">
-          <table id="consumptionTable">
-            <thead>
-              <tr>
-                <th style="width: 20%;">Mois</th>
-                <th style="width: 25%;">Consommation (€)</th>
-                <th style="width: 25%;">Consommation (kWh)</th>
-                <th style="width: 30%;">Coût par kWh (€)</th>
-              </tr>
-            </thead>
-            <tbody id="consumptionTableBody">
-              <!-- On insère dynamiquement les 12 lignes -->
-              <!-- Ligne pour les totaux annuels (reste en bas) -->
-              <tr>
-                <td><strong>Total annuel</strong></td>
-                <td id="totalEuros">-</td>
-                <td id="totalKwh">-</td>
-                <td id="totalCostPerKwh">-</td>
-              </tr>
-            </tbody>
-          </table>
-          <script>
-            const months = [
-              "Janvier","Février","Mars","Avril","Mai","Juin",
-              "Juillet","Août","Septembre","Octobre","Novembre","Décembre",
-            ];
-
-            window.addEventListener('DOMContentLoaded', () => {
-              const tBody = document.getElementById('consumptionTableBody');
-              const totalRow = tBody.querySelector('tr'); // la ligne "Total annuel"
-
-              // Insérer les 12 lignes AVANT la ligne de total
+        <table id="consumptionTable">
+          <thead>
+            <tr>
+              <th style="width: 20%;">Mois</th>
+              <th style="width: 25%;">Consommation (€)</th>
+              <th style="width: 25%;">Consommation (kWh)</th>
+              <th style="width: 30%;">Coût par kWh (€)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <script>
+              const months = [
+                "Janvier","Février","Mars","Avril","Mai","Juin",
+                "Juillet","Août","Septembre","Octobre","Novembre","Décembre",
+              ];
               months.forEach((month, index) => {
-                // Crée la ligne
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                  <td>${month}</td>
-                  <td>
-                    <input
-                      type="number"
-                      id="euros_${index}"
-                      name="euros_${index}"
-                      class="euroInput"
-                      oninput="calculateCost(${index})"
-                      placeholder="€"
-                      style="width: 90%;"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      id="kwh_${index}"
-                      name="kwh_${index}"
-                      class="kwhInput"
-                      oninput="calculateCost(${index})"
-                      placeholder="kWh"
-                      style="width: 90%;"
-                    />
-                  </td>
-                  <td id="costPerKwh_${index}">-</td>
-                `;
-                tBody.insertBefore(row, totalRow); 
+                document.write(`
+                  <tr>
+                    <td>${month}</td>
+                    <td>
+                      <input
+                        type="number"
+                        id="euros_${index}"
+                        name="euros_${index}"
+                        class="euroInput"
+                        oninput="calculateCost(${index})"
+                        placeholder="€"
+                        style="width: 90%;"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        id="kwh_${index}"
+                        name="kwh_${index}"
+                        class="kwhInput"
+                        oninput="calculateCost(${index})"
+                        placeholder="kWh"
+                        style="width: 90%;"
+                      />
+                    </td>
+                    <td id="costPerKwh_${index}">-</td>
+                  </tr>
+                `);
               });
-            });
+            </script>
+            <!-- Ligne pour les totaux annuels -->
+            <tr>
+              <td><strong>Total annuel</strong></td>
+              <td id="totalEuros">-</td>
+              <td id="totalKwh">-</td>
+              <td id="totalCostPerKwh">-</td>
+            </tr>
+          </tbody>
+        </table>
+        <script>
+          function calculateCost(index) {
+            const eurosInput = document.getElementById(`euros_${index}`);
+            const kwhInput = document.getElementById(`kwh_${index}`);
+            const costPerKwhCell = document.getElementById(`costPerKwh_${index}`);
 
-            function calculateCost(index) {
-              const eurosInput = document.getElementById(\`euros_\${index}\`);
-              const kwhInput = document.getElementById(\`kwh_\${index}\`);
-              const costPerKwhCell = document.getElementById(\`costPerKwh_\${index}\`);
+            const euros = parseFloat(eurosInput.value) || 0;
+            const kwh = parseFloat(kwhInput.value) || 0;
 
-              const euros = parseFloat(eurosInput.value) || 0;
-              const kwh = parseFloat(kwhInput.value) || 0;
-
-              if (kwh > 0) {
-                const costPerKwh = (euros / kwh).toFixed(2);
-                costPerKwhCell.textContent = \`\${costPerKwh} €\`;
-              } else {
-                costPerKwhCell.textContent = "-";
-              }
-              calculateTotals();
+            if (kwh > 0) {
+              const costPerKwh = (euros / kwh).toFixed(2);
+              costPerKwhCell.textContent = `${costPerKwh} €`;
+            } else {
+              costPerKwhCell.textContent = "-";
             }
+            calculateTotals();
+          }
 
-            function calculateTotals() {
-              let totalEuros = 0, totalKwh = 0;
-              for (let i = 0; i < 12; i++) {
-                const eurosVal = parseFloat(document.getElementById(\`euros_\${i}\`).value) || 0;
-                const kwhVal = parseFloat(document.getElementById(\`kwh_\${i}\`).value) || 0;
-                totalEuros += eurosVal;
-                totalKwh += kwhVal;
-              }
-              const averageCostPerKwh = totalKwh > 0 ? (totalEuros / totalKwh).toFixed(2) : "-";
-
-              document.getElementById("totalEuros").textContent =
-                totalEuros.toFixed(2).toLocaleString('fr-FR') + " €";
-              document.getElementById("totalKwh").textContent =
-                totalKwh.toFixed(2).toLocaleString('fr-FR') + " kWh";
-              document.getElementById("totalCostPerKwh").textContent =
-                totalKwh > 0 ? \`\${averageCostPerKwh} €\` : "-";
+          function calculateTotals() {
+            let totalEuros = 0, totalKwh = 0;
+            for (let i = 0; i < 12; i++) {
+              const eurosVal = parseFloat(document.getElementById(`euros_${i}`).value) || 0;
+              const kwhVal = parseFloat(document.getElementById(`kwh_${i}`).value) || 0;
+              totalEuros += eurosVal;
+              totalKwh += kwhVal;
             }
-          </script>
-        </div>
+            const averageCostPerKwh = totalKwh > 0 ? (totalEuros / totalKwh).toFixed(2) : "-";
+
+            document.getElementById("totalEuros").textContent = 
+              totalEuros.toFixed(2).toLocaleString('fr-FR') + " €";
+            document.getElementById("totalKwh").textContent = 
+              totalKwh.toFixed(2).toLocaleString('fr-FR') + " kWh";
+            document.getElementById("totalCostPerKwh").textContent =
+              totalKwh > 0 ? `${averageCostPerKwh} €` : "-";
+          }
+        </script>
       </div>
 
       <!-- 4.5) Commentaires -->
       <div class="form-section">
         <h3>Commentaires</h3>
-        <div class="collapsible-content">
-          <label for="comments">Commentaires :</label>
-          <textarea
-            id="comments"
-            name="comments"
-            placeholder="Entrez vos commentaires"
-          ></textarea>
-        </div>
+        <label for="comments">Commentaires :</label>
+        <textarea
+          id="comments"
+          name="comments"
+          placeholder="Entrez vos commentaires"
+        ></textarea>
       </div>
-
     </form>
 
     <!-- (5) Boutons PDF + gestion JSON -->
@@ -749,6 +723,7 @@
       return best;
     }
 
+    // ***** ICI : ON N'INSÈRE PAS d'espace dans "Surface toiture" *****
     map.on(L.Draw.Event.CREATED, function (e) {
       const layer = e.layer;
       drawnItems.addLayer(layer);
@@ -760,8 +735,13 @@
         }
         const area = L.GeometryUtil.geodesicArea(latLngs);
         const areaInt = Math.round(area);
+
+        // On peut afficher la version formatée dans l'alerte :
         alert(`Surface mesurée : ${areaInt.toLocaleString('fr-FR')} m²`);
+
+        // Mais dans le champ, on met la valeur brute (pas d'espace insécable)
         document.getElementById("Surface toiture").value = areaInt;
+
         updateProductionPotential();
       } else if (e.layerType === "polyline") {
         const latLngs = layer.getLatLngs();
@@ -777,6 +757,7 @@
           document.getElementById("orientationIrr").value = aspectObj.aspect.toString();
           alert(`Orientation déterminée: ${aspectObj.label} (aspect=${aspectObj.aspect})`);
         }
+        // Retirer la ligne si on veut
         drawnItems.removeLayer(layer);
       }
     });
@@ -861,7 +842,7 @@
      ***************************************************/
     function updateProductionPotential() {
       const surfaceStr = document.getElementById("Surface toiture").value
-        .replace(/\s/g, "")
+        .replace(/\s/g, "") // on supprime les espaces éventuels (juste au cas où)
         .replace(/\./g, "")
         .replace(/,/g, "");
       const exclStr = document.getElementById("exclusionPercent").value;
@@ -1063,21 +1044,6 @@
           updateProductionPotential();
         };
         reader.readAsText(file);
-      }
-    });
-
-    /***************************************************
-     * 6) RENDRE CHAQUE BLOC "form-section" REPLIABLE
-     ***************************************************/
-    // Pour chaque bloc .form-section, on prend le <h3> et le .collapsible-content
-    const allSections = document.querySelectorAll('.form-section');
-    allSections.forEach(section => {
-      const header = section.querySelector('h3');
-      const content = section.querySelector('.collapsible-content');
-      if (header && content) {
-        header.addEventListener('click', () => {
-          content.style.display = (content.style.display === 'none') ? 'block' : 'none';
-        });
       }
     });
   </script>
