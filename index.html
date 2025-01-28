@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>55FRH PRO formulaire</title>
+  <title>FRH PRO </title>
 
   <!-- (1) Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
@@ -71,7 +71,7 @@
     }
 
     /* ------------------------------
-       Formulaires
+       s
     -------------------------------- */
     form {
       display: flex;
@@ -249,9 +249,9 @@
 
 <body>
   <div class="container">
-    <h1 class="page-title">Formulaire pour saisie données FRH PRO</h1>
+    <h1 class="page-title"> 45pour saisie données FRH PRO</h1>
 
-    <!-- (1) Formulaire de recherche d'adresse -->
+    <!-- (1)  de recherche d'adresse -->
     <form id="addressForm" onsubmit="return searchAddress(event);">
       <label for="address">Adresse :</label>
       <input
@@ -274,7 +274,7 @@
       <canvas id="drawingCanvas"></canvas>
     </div>
 
-    <!-- (4) Formulaire principal -->
+    <!-- (4)  principal -->
     <form id="userForm">
 
       <!-- 4.1) Informations société -->
@@ -666,13 +666,13 @@
       }
     });
 
-    // Calcul de surface (rectangle ou polygone)
+    // Quand on termine de dessiner un rectangle ou polygone => on calcule la surface
     map.on(L.Draw.Event.CREATED, function (e) {
       const layer = e.layer;
       drawnItems.addLayer(layer);
 
       if (e.layerType === 'polygon' || e.layerType === 'rectangle') {
-        // Récupération du 1er anneau (rectangle = polygone à 4 sommets)
+        // Récupération du 1er anneau
         let latLngs = layer.getLatLngs();
         if (Array.isArray(latLngs[0])) {
           latLngs = latLngs[0];
@@ -701,7 +701,7 @@
         if (data.length > 0) {
           const { lat, lon } = data[0];
           map.setView([lat, lon], 18);
-          AdresseField.value = address; // Sauvegarder l'adresse dans le formulaire
+          AdresseField.value = address; // Sauvegarder l'adresse dans le 
         } else {
           alert("Adresse introuvable.");
         }
@@ -718,7 +718,7 @@
       const mapContainer = document.getElementById("map-container");
       const userForm = document.getElementById("userForm");
 
-      // 1) Capture de la carte + dessin
+      // 1) Capture de la carte + dessin (y compris polygones bleus)
       html2canvas(mapContainer, {
         useCORS: true,
         scale: 2, // Meilleure qualité
@@ -730,7 +730,7 @@
         // Ajout de l'image (carte + dessin) en page 1
         pdf.addImage(mapImage, "PNG", 10, 10, 190, 100);
 
-        // Ajout des champs du formulaire (page 1)
+        // Ajout des champs du  (page 1)
         let yOffset = 120;
         const formData = new FormData(userForm);
 
@@ -758,8 +758,8 @@
           // 4) Sauvegarde du PDF
           const companyName = document.getElementById("companyName").value;
           const pdfFileName = companyName
-            ? `Formulaire_${companyName}.pdf`
-            : "Formulaire.pdf";
+            ? `_${companyName}.pdf`
+            : ".pdf";
           pdf.save(pdfFileName);
         });
       });
@@ -790,17 +790,22 @@
         }
       });
 
-      // Sauvegarde du centre/zoom de la carte et du dessin
+      // (A) Sauvegarder la position de la carte et le canvas
       const center = map.getCenter();
       formObject["mapCenterLat"] = center.lat;
       formObject["mapCenterLng"] = center.lng;
       formObject["mapZoom"] = map.getZoom();
       formObject["canvasImage"] = drawingCanvas.toDataURL();
 
-      // Nom de fichier dynamique
-      const companyName = formObject["companyName"] || "Formulaire";
-      const fileName = `Formulaire_${companyName}.json`;
+      // (B) Sauvegarder les formes Leaflet Draw (GeoJSON)
+      const shapesGeoJSON = drawnItems.toGeoJSON();
+      formObject["drawnShapes"] = shapesGeoJSON;
 
+      // (C) Nom de fichier dynamique
+      const companyName = formObject["companyName"] || "";
+      const fileName = `_${companyName}.json`;
+
+      // (D) Génération du fichier JSON
       const jsonString = JSON.stringify(formObject, null, 2);
       const blob = new Blob([jsonString], { type: "application/json" });
 
@@ -828,7 +833,7 @@
             const dataValue = jsonData[key];
 
             // Gestion spéciale carte et canvas
-            if (["mapCenterLat","mapCenterLng","mapZoom","canvasImage"].includes(key)) {
+            if (["mapCenterLat","mapCenterLng","mapZoom","canvasImage","drawnShapes"].includes(key)) {
               return; // on traite plus bas
             }
 
@@ -850,7 +855,7 @@
             }
           });
 
-          // Restauration de la carte
+          // (A) Restauration de la carte
           if (
             jsonData["mapCenterLat"] !== undefined &&
             jsonData["mapCenterLng"] !== undefined &&
@@ -862,7 +867,7 @@
             );
           }
 
-          // Restauration du dessin (canvas)
+          // (B) Restauration du dessin (canvas)
           if (jsonData["canvasImage"]) {
             const image = new Image();
             image.onload = function () {
@@ -872,7 +877,17 @@
             image.src = jsonData["canvasImage"];
           }
 
-          // Recalculer le tableau (coût/kWh) après chargement
+          // (C) Restauration des formes (GeoJSON)
+          if (jsonData["drawnShapes"]) {
+            // Vider d'éventuelles formes existantes
+            drawnItems.clearLayers();
+            // Recréer depuis le GeoJSON
+            L.geoJson(jsonData["drawnShapes"]).eachLayer(function(layer) {
+              drawnItems.addLayer(layer);
+            });
+          }
+
+          // (D) Recalculer le tableau (coût/kWh) après chargement
           for (let i = 0; i < 12; i++) {
             calculateCost(i);
           }
