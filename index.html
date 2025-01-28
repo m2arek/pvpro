@@ -24,9 +24,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 
-  <!-- Chart.js pour le graphique à barres -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <style>
     /* ------------------------------
        Styles généraux
@@ -101,6 +98,7 @@
       box-sizing: border-box;
       margin-top: 5px;
     }
+
     input[type="text"]:focus,
     input[type="number"]:focus,
     input[type="time"]:focus,
@@ -189,6 +187,7 @@
       gap: 5px 10px;
       margin-top: 5px;
     }
+
     .checkbox-grid label {
       display: flex;
       align-items: center;
@@ -199,6 +198,7 @@
       border: 1px solid #ccc;
       cursor: pointer;
     }
+
     .checkbox-grid input[type="checkbox"] {
       margin-right: 6px;
     }
@@ -219,24 +219,6 @@
     }
     #consumptionTable thead {
       background-color: #f0f0f0;
-    }
-
-    /* ------------------------------
-       Production mensuelle : style bloc replié
-    -------------------------------- */
-    #productionMensuelleContent {
-      display: none; /* caché par défaut */
-      margin-top: 10px;
-    }
-    #monthlyTable {
-      border: 1px solid #ccc;
-      width: 100%;
-      text-align: center;
-      border-collapse: collapse;
-    }
-    #monthlyTable th, #monthlyTable td {
-      padding: 5px;
-      border: 1px solid #ccc;
     }
 
     /* ------------------------------
@@ -338,35 +320,6 @@
         <label for="productionInstall">Production en kWh de l'installation :</label>
         <input type="text" id="productionInstall" name="productionInstall" readonly />
       </div>
-
-      <!-- NOUVEAU BLOC "Production mensuelle" -->
-      <div class="form-section">
-        <!-- Titre cliquable -->
-        <h3 id="toggleMonthlyProd" style="cursor:pointer; color:#007BFF; text-decoration:underline;">
-          Production mensuelle
-        </h3>
-
-        <!-- Contenu caché par défaut -->
-        <div id="productionMensuelleContent">
-          <!-- Tableau mensuel -->
-          <table id="monthlyTable">
-            <thead>
-              <tr>
-                <th>Mois</th>
-                <th>Production (kWh)</th>
-              </tr>
-            </thead>
-            <tbody id="monthlyTableBody"></tbody>
-          </table>
-
-          <!-- Graphique à barres -->
-          <div style="margin-top:20px;">
-            <canvas id="monthlyChart" width="400" height="200"></canvas>
-          </div>
-        </div>
-      </div>
-      <!-- / BLOC "Production mensuelle" -->
-
 
       <!-- 4.1) Informations société -->
       <div class="form-section">
@@ -580,16 +533,16 @@
         </table>
         <script>
           function calculateCost(index) {
-            const eurosInput = document.getElementById(\`euros_\${index}\`);
-            const kwhInput = document.getElementById(\`kwh_\${index}\`);
-            const costPerKwhCell = document.getElementById(\`costPerKwh_\${index}\`);
+            const eurosInput = document.getElementById(`euros_${index}`);
+            const kwhInput = document.getElementById(`kwh_${index}`);
+            const costPerKwhCell = document.getElementById(`costPerKwh_${index}`);
 
             const euros = parseFloat(eurosInput.value) || 0;
             const kwh = parseFloat(kwhInput.value) || 0;
 
             if (kwh > 0) {
               const costPerKwh = (euros / kwh).toFixed(2);
-              costPerKwhCell.textContent = \`\${costPerKwh} €\`;
+              costPerKwhCell.textContent = `${costPerKwh} €`;
             } else {
               costPerKwhCell.textContent = "-";
             }
@@ -599,19 +552,19 @@
           function calculateTotals() {
             let totalEuros = 0, totalKwh = 0;
             for (let i = 0; i < 12; i++) {
-              const eurosVal = parseFloat(document.getElementById(\`euros_\${i}\`).value) || 0;
-              const kwhVal = parseFloat(document.getElementById(\`kwh_\${i}\`).value) || 0;
+              const eurosVal = parseFloat(document.getElementById(`euros_${i}`).value) || 0;
+              const kwhVal = parseFloat(document.getElementById(`kwh_${i}`).value) || 0;
               totalEuros += eurosVal;
               totalKwh += kwhVal;
             }
             const averageCostPerKwh = totalKwh > 0 ? (totalEuros / totalKwh).toFixed(2) : "-";
 
-            document.getElementById("totalEuros").textContent =
+            document.getElementById("totalEuros").textContent = 
               totalEuros.toFixed(2).toLocaleString('fr-FR') + " €";
-            document.getElementById("totalKwh").textContent =
+            document.getElementById("totalKwh").textContent = 
               totalKwh.toFixed(2).toLocaleString('fr-FR') + " kWh";
             document.getElementById("totalCostPerKwh").textContent =
-              totalKwh > 0 ? \`\${averageCostPerKwh} €\` : "-";
+              totalKwh > 0 ? `${averageCostPerKwh} €` : "-";
           }
         </script>
       </div>
@@ -770,7 +723,7 @@
       return best;
     }
 
-    // Nous n'insérons pas de séparateur de milliers dans "Surface toiture"
+    // ***** ICI : ON N'INSÈRE PAS d'espace dans "Surface toiture" *****
     map.on(L.Draw.Event.CREATED, function (e) {
       const layer = e.layer;
       drawnItems.addLayer(layer);
@@ -782,8 +735,11 @@
         }
         const area = L.GeometryUtil.geodesicArea(latLngs);
         const areaInt = Math.round(area);
+
+        // On peut afficher la version formatée dans l'alerte :
         alert(`Surface mesurée : ${areaInt.toLocaleString('fr-FR')} m²`);
-        // On met la valeur brute dans le champ
+
+        // Mais dans le champ, on met la valeur brute (pas d'espace insécable)
         document.getElementById("Surface toiture").value = areaInt;
 
         updateProductionPotential();
@@ -842,60 +798,26 @@
     /***************************************************
      * 3B) CALCUL PRODUCTIBLE (API PVGIS)
      ***************************************************/
-    let monthlyKwhKwc = new Array(12).fill(0); // stockage brut (kWh/kWc) par mois
-
-async function getProductible(lat, lon, aspectValue) {
-  const originalUrl = `https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?outputformat=basic&lat=${lat}&lon=${lon}&raddatabase=PVGIS-SARAH2&peakpower=1&loss=14&pvtechchoice=crystSi&angle=35&aspect=${aspectValue}&usehorizon=1`;
-  const proxyUrl = `https://corsproxy.io/?key=a32495b2&url=${encodeURIComponent(originalUrl)}`;
-
-  try {
-    const response = await fetch(proxyUrl);
-    if (!response.ok) return null;
-    const text = await response.text();
-    const lines = text.split('\n');
-
-    // Réinitialiser le tableau mensuel
-    monthlyKwhKwc = new Array(12).fill(0);
-
-    // On cherche "Jan", "Feb", etc.
-    const monthKeys = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-    lines.forEach(line => {
-      const trimmed = line.trim();
-      if (!trimmed) return;  // ligne vide
-      // ex: "Jan    50.0"
-      const monthPrefix = trimmed.substring(0,3).toLowerCase();
-
-      for (let i = 0; i < 12; i++) {
-        if (monthPrefix === monthKeys[i].toLowerCase()) {
-          const parts = trimmed.split(/\s+/);
-          // parts[0] = "Jan", parts[1] = "50"
-          const val = parseFloat(parts[1]) || 0;
-          monthlyKwhKwc[i] = val;
-          break;
+    async function getProductible(lat, lon, aspectValue) {
+      const originalUrl = `https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?outputformat=basic&lat=${lat}&lon=${lon}&raddatabase=PVGIS-SARAH2&peakpower=1&loss=14&pvtechchoice=crystSi&angle=35&aspect=${aspectValue}&usehorizon=1`;
+      const proxyUrl = `https://corsproxy.io/?key=a32495b2&url=${encodeURIComponent(originalUrl)}`;
+      try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) return null;
+        const text = await response.text();
+        const lines = text.split("\n");
+        for (let line of lines) {
+          if (line.includes("Year")) {
+            const parts = line.split("\t");
+            return parseFloat(parts[1]);
+          }
         }
-      }
-    });
-
-    // On cherche "Year" (production annuelle) comme avant
-    let yearVal = null;
-    for (let line of lines) {
-      if (line.toLowerCase().includes("year")) {
-        // ex: "Year  700.2"
-        const parts = line.trim().split(/\s+/);
-        if (parts.length > 1) {
-          yearVal = parseFloat(parts[1]);
-        }
-        break;
+        return null;
+      } catch (e) {
+        console.error(e);
+        return null;
       }
     }
-    return yearVal;
-  } catch(e) {
-    console.error(e);
-    return null;
-  }
-}
-
 
     document.getElementById("calculateIrrButton").addEventListener("click", async () => {
       const lat = parseFloat(document.getElementById("latitudeIrr").value);
@@ -916,11 +838,11 @@ async function getProductible(lat, lon, aspectValue) {
     });
 
     /***************************************************
-     * 3C) CALCUL "POTENTIEL DE PRODUCTION" + MENSUEL
+     * 3C) CALCUL "POTENTIEL DE PRODUCTION"
      ***************************************************/
     function updateProductionPotential() {
       const surfaceStr = document.getElementById("Surface toiture").value
-        .replace(/\s/g, "")
+        .replace(/\s/g, "") // on supprime les espaces éventuels (juste au cas où)
         .replace(/\./g, "")
         .replace(/,/g, "");
       const exclStr = document.getElementById("exclusionPercent").value;
@@ -944,79 +866,25 @@ async function getProductible(lat, lon, aspectValue) {
       const puissanceMaxW = nbPanels * panelPower;
       const puissanceMaxKW = Math.round(puissanceMaxW / 1000);
 
-      // Production en kWh = puissanceMax(kWc) * productibleVal
+      // Production en kWh = puissanceMax(kWc) * productible (kWh/kWc/an)
       const production = Math.round(puissanceMaxKW * productibleVal);
 
-      // On applique le séparateur de milliers
+      // On applique le séparateur de milliers pour l'affichage final
       document.getElementById("nombrePVMax").value = nbPanels.toLocaleString('fr-FR');
       document.getElementById("puissanceMaxPV").value = puissanceMaxKW.toLocaleString('fr-FR');
       document.getElementById("productionInstall").value = production.toLocaleString('fr-FR');
-
-      // --> Mettre à jour le bloc "Production mensuelle"
-      updateMonthlyProduction(puissanceMaxKW);
     }
 
-    // Mets à jour le tableau "Production mensuelle" + le graphique
-    function updateMonthlyProduction(puissanceMaxKW) {
-      // monthlyKwhKwc[i] = production mensuelle pour 1 kWc
-      // On multiplie par puissanceMaxKW => production du mois complet
-      const monthlyTableBody = document.getElementById("monthlyTableBody");
-      monthlyTableBody.innerHTML = "";
+    // On recalcule quand l’utilisateur modifie ces champs
+    const surfaceInput = document.getElementById("Surface toiture");
+    const exclInput = document.getElementById("exclusionPercent");
+    const panelSelect = document.getElementById("puissancePanneau");
+    const productibleInput = document.getElementById("productible");
 
-      const monthlyVals = [];
-      const monthNamesFr = ["Janvier","Février","Mars","Avril","Mai","Juin",
-                            "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-
-      for (let i=0; i<12; i++) {
-        const valKwh = Math.round(monthlyKwhKwc[i] * puissanceMaxKW);
-        monthlyVals.push(valKwh);
-        // On insère une ligne dans le tableau
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${monthNamesFr[i]}</td>
-          <td>${valKwh.toLocaleString('fr-FR')}</td>
-        `;
-        monthlyTableBody.appendChild(row);
-      }
-
-      // Mettre à jour le graphique
-      updateMonthlyChart(monthNamesFr, monthlyVals);
-    }
-
-    let monthlyChartObj = null; // instance du chart.js
-    function updateMonthlyChart(monthLabels, monthlyVals) {
-      const ctxChart = document.getElementById("monthlyChart").getContext("2d");
-      if (monthlyChartObj) {
-        monthlyChartObj.destroy(); // on détruit l'ancien
-      }
-      monthlyChartObj = new Chart(ctxChart, {
-        type: 'bar',
-        data: {
-          labels: monthLabels,
-          datasets: [{
-            label: 'Production mensuelle (kWh)',
-            data: monthlyVals,
-            backgroundColor: 'rgba(75, 192, 192, 0.6)'
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      });
-    }
-
-    // Toggle bloc "Production mensuelle" (afficher/cacher)
-    const toggleMonthlyProd = document.getElementById("toggleMonthlyProd");
-    const productionMensuelleContent = document.getElementById("productionMensuelleContent");
-    let monthlyProdVisible = false;
-    toggleMonthlyProd.addEventListener("click", () => {
-      monthlyProdVisible = !monthlyProdVisible;
-      productionMensuelleContent.style.display = monthlyProdVisible ? "block" : "none";
-    });
+    surfaceInput.addEventListener("input", updateProductionPotential);
+    exclInput.addEventListener("input", updateProductionPotential);
+    panelSelect.addEventListener("change", updateProductionPotential);
+    productibleInput.addEventListener("input", updateProductionPotential);
 
     /***************************************************
      * 4) EXPORT PDF (2 PAGES)
@@ -1178,12 +1046,6 @@ async function getProductible(lat, lon, aspectValue) {
         reader.readAsText(file);
       }
     });
-
-    /***************************************************
-     * 6) GESTION DU BLOC "Production mensuelle"
-     ***************************************************/
-    // Par défaut, invisible => on a #productionMensuelleContent en display:none
-    // Au clic sur #toggleMonthlyProd, on "toggle" l'affichage (déjà géré ci-dessus).
   </script>
 </body>
 </html>
