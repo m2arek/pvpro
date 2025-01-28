@@ -142,12 +142,9 @@
       margin-right: 5px;
       margin-bottom: 5px;
     }
-
     button:hover {
       background-color: #2980b9;
     }
-
-    /* Bouton "Activer le dessin" */
     #toggleDrawingButton {
       float: right;
     }
@@ -168,8 +165,6 @@
       width: 100%;
       height: 100%;
     }
-
-    /* Le canvas de dessin libre */
     #drawingCanvas {
       position: absolute;
       top: 0;
@@ -177,10 +172,8 @@
       width: 100%;
       height: 100%;
       z-index: 1000; /* Le canvas */
-      pointer-events: none; /* Par défaut, n'intercepte pas les événements */
+      pointer-events: none;
     }
-
-    /* Forcer la barre d'outils de Leaflet Draw au-dessus du canvas */
     .leaflet-draw {
       z-index: 1500 !important;
     }
@@ -227,13 +220,9 @@
     #consumptionTable thead {
       background-color: #f0f0f0;
     }
-    #consumptionTable tfoot {
-      background-color: #f0f0f0;
-      font-weight: bold;
-    }
 
     /* ------------------------------
-       Responsivité basique
+       Responsivité
     -------------------------------- */
     @media (max-width: 768px) {
       #toggleDrawingButton {
@@ -276,9 +265,9 @@
 
     <!-- (4) Formulaire principal -->
     <form id="userForm">
-      <!-- BLOC "Données irradiation", inchangé -->
+      <!-- BLOC "Données irradiation" -->
       <div class="form-section">
-        <h3>Données irradiation (test)</h3>
+        <h3>Données irradiation</h3>
 
         <label for="latitudeIrr">Latitude :</label>
         <input type="text" id="latitudeIrr" name="latitudeIrr" readonly />
@@ -302,32 +291,94 @@
         <button type="button" id="calculateIrrButton">Calculer le productible</button>
       </div>
 
-      <!-- 4.1) Informations société, etc. (inchangé) -->
+      <!-- NOUVEAU BLOC : "Potentiel de production" -->
+      <div class="form-section">
+        <h3>Potentiel de production</h3>
+
+        <label for="exclusionPercent">% surface exclusion :</label>
+        <input
+          type="number"
+          id="exclusionPercent"
+          name="exclusionPercent"
+          value="0"
+          placeholder="Ex: 10"
+        />
+
+        <label for="puissancePanneau">Puissance du panneau :</label>
+        <select id="puissancePanneau" name="puissancePanneau">
+          <option value="420" selected>420 Wc</option>
+          <option value="440">440 Wc</option>
+          <option value="500">500 Wc</option>
+        </select>
+
+        <label for="nombrePVMax">Nombre de PV max :</label>
+        <input type="number" id="nombrePVMax" name="nombrePVMax" readonly />
+
+        <label for="puissanceMaxPV">Puissance max PV (Wc) :</label>
+        <input type="number" id="puissanceMaxPV" name="puissanceMaxPV" readonly />
+
+        <label for="productionInstall">Production en kWh de l'installation :</label>
+        <input type="number" id="productionInstall" name="productionInstall" readonly />
+      </div>
+
+      <!-- 4.1) Informations société -->
       <div class="form-section">
         <h3>Informations sur la société</h3>
         <label for="Adresse">Adresse entrée :</label>
         <input type="text" id="Adresse" name="Adresse" readonly />
 
         <label for="companyName">Société :</label>
-        <input type="text" id="companyName" name="companyName" placeholder="Entrez le nom de la société" />
+        <input
+          type="text"
+          id="companyName"
+          name="companyName"
+          placeholder="Entrez le nom de la société"
+        />
 
         <label for="activity">Activité :</label>
-        <input type="text" id="activity" name="activity" placeholder="Entrez l'activité" />
+        <input
+          type="text"
+          id="activity"
+          name="activity"
+          placeholder="Entrez l'activité"
+        />
 
         <label for="Nom">Nom :</label>
-        <input type="text" id="Nom" name="Nom" placeholder="Entrez le nom" />
+        <input
+          type="text"
+          id="Nom"
+          name="Nom"
+          placeholder="Entrez le nom"
+        />
 
         <label for="Prénom">Prénom :</label>
-        <input type="text" id="Prénom" name="Prénom" placeholder="Entrez le prénom" />
+        <input
+          type="text"
+          id="Prénom"
+          name="Prénom"
+          placeholder="Entrez le prénom"
+        />
 
         <label for="Statut">Statut :</label>
-        <input type="text" id="Statut" name="Statut" placeholder="Statut dans ste" />
+        <input
+          type="text"
+          id="Statut"
+          name="Statut"
+          placeholder="Statut dans ste"
+        />
       </div>
 
+      <!-- 4.2) Informations toiture -->
       <div class="form-section">
         <h3>Informations sur la toiture</h3>
+
         <label for="Surface toiture">Surface toiture (m²) :</label>
-        <input type="number" id="Surface toiture" name="Surface toiture" placeholder="Entrez la surface..." />
+        <input
+          type="number"
+          id="Surface toiture"
+          name="Surface toiture"
+          placeholder="Entrez la surface de la toiture"
+        />
 
         <label for="Type de toiture">Type de toiture :</label>
         <select id="Type de toiture" name="Type de toiture">
@@ -338,7 +389,12 @@
         </select>
 
         <label for="Pente toiture">Pente toiture (°) :</label>
-        <input type="number" id="Pente toiture" name="Pente toiture" placeholder="Pente de la toiture" />
+        <input
+          type="number"
+          id="Pente toiture"
+          name="Pente toiture"
+          placeholder="Pente de la toiture"
+        />
 
         <label for="Type de couverture">Type de couverture :</label>
         <select id="Type de couverture" name="Type de couverture">
@@ -374,6 +430,7 @@
       <!-- 4.3) Periodes d'utilisation -->
       <div class="form-section">
         <h3>Periodes d'utilisation</h3>
+
         <h4>Mois de congés</h4>
         <div class="checkbox-grid">
           <label><input type="checkbox" name="moisConges[]" value="Janvier" />Janvier</label>
@@ -408,7 +465,12 @@
         <input type="time" id="heureFin" name="heureFin" />
 
         <label for="Puissance compteur">Puissance compteur (Kva) :</label>
-        <input type="number" id="Puissance compteur" name="Puissance compteur" placeholder="Puissance compteur" />
+        <input
+          type="number"
+          id="Puissance compteur"
+          name="Puissance compteur"
+          placeholder="Puissance compteur"
+        />
       </div>
 
       <!-- 4.4) Tableau de consommation mensuelle -->
@@ -470,7 +532,6 @@
           </tbody>
         </table>
         <script>
-          // Fonction pour calculer le coût/kWh
           function calculateCost(index) {
             const eurosInput = document.getElementById(`euros_${index}`);
             const kwhInput = document.getElementById(`kwh_${index}`);
@@ -487,6 +548,7 @@
             }
             calculateTotals();
           }
+
           function calculateTotals() {
             let totalEuros = 0, totalKwh = 0;
             for (let i = 0; i < 12; i++) {
@@ -496,7 +558,6 @@
               totalKwh += kwhVal;
             }
             const averageCostPerKwh = totalKwh > 0 ? (totalEuros / totalKwh).toFixed(2) : "-";
-
             document.getElementById("totalEuros").textContent = totalEuros.toFixed(2) + " €";
             document.getElementById("totalKwh").textContent = totalKwh.toFixed(2) + " kWh";
             document.getElementById("totalCostPerKwh").textContent =
@@ -509,7 +570,11 @@
       <div class="form-section">
         <h3>Commentaires</h3>
         <label for="comments">Commentaires :</label>
-        <textarea id="comments" name="comments" placeholder="Entrez vos commentaires"></textarea>
+        <textarea
+          id="comments"
+          name="comments"
+          placeholder="Entrez vos commentaires"
+        ></textarea>
       </div>
     </form>
 
@@ -526,7 +591,7 @@
     /***************************************************
      * 1) INITIALISER LA CARTE LEAFLET (Google Satellite)
      ***************************************************/
-    const map = L.map("map").setView([48.8566, 2.3522], 18); // Paris par défaut
+    const map = L.map("map").setView([48.8566, 2.3522], 18);
     const tileLayer = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
       maxZoom: 20,
       subdomains: ["mt0", "mt1", "mt2", "mt3"],
@@ -534,7 +599,6 @@
     });
     tileLayer.addTo(map);
 
-    // Marqueur pour l'adresse recherchée
     let searchMarker = null;
 
     /***************************************************
@@ -572,13 +636,11 @@
       const y = event.clientY - rect.top;
       ctx.moveTo(x, y);
     });
-
     drawingCanvas.addEventListener("mouseup", () => {
       if (!drawingEnabled) return;
       drawing = false;
       ctx.beginPath();
     });
-
     drawingCanvas.addEventListener("mousemove", (event) => {
       if (!drawing || !drawingEnabled) return;
       ctx.lineWidth = 2;
@@ -594,12 +656,12 @@
     });
 
     /***************************************************
-     * A) AJOUT DES OUTILS DE DESSIN (Leaflet Draw)
+     * A) OUTILS DE MESURE/DESSIN LEAFLET DRAW
      ***************************************************/
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
 
-    // ICI on autorise polygon, rectangle, *et polyline*
+    // On autorise polygon, rectangle, polyline
     const drawControl = new L.Control.Draw({
       draw: {
         marker: false,
@@ -607,7 +669,7 @@
         circlemarker: false,
         polygon: true,
         rectangle: true,
-        polyline: true  // <= on autorise l'utilisateur à tracer une "flèche"
+        polyline: true
       },
       edit: {
         featureGroup: drawnItems
@@ -627,33 +689,21 @@
       }
     });
 
-    // Fonction pour calculer un "bearing" en degrés, du Nord vers l'Est
+    // Calcul du bearing
     function computeBearing(lat1, lng1, lat2, lng2) {
       const toRad = (val) => val * Math.PI / 180;
       const toDeg = (val) => val * 180 / Math.PI;
 
       const dLon = toRad(lng2 - lng1);
       const y = Math.sin(dLon) * Math.cos(toRad(lat2));
-      const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
-                Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+      const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2))
+        - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
       let brng = Math.atan2(y, x);
       brng = toDeg(brng);
-      // on convertit en [0..360)
       return (brng + 360) % 360;
     }
 
-    // Mappage angle => orientation => aspect
     function mapAngleToAspect(angle) {
-      // angle = 0 => Nord
-      // On veut 5 orientations : SUD, EST, OUEST, SUD-EST, SUD-OUEST
-      // Définissons des intervalles (par exemple +/- 22.5° autour de la direction)
-      // SUD = 180°, EST = 90°, OUEST = 270°, SUD-EST = 135°, SUD-OUEST=225°
-
-      //  0..360 => on compare
-      // On peut faire un test en "delta" ou un switch
-
-      // On calcule l'écart min entre angle et un angle-cible
-      // Par exemple :
       const targets = [
         { label: "SUD", deg: 180, aspect: 0 },
         { label: "EST", deg: 90, aspect: -90 },
@@ -661,29 +711,25 @@
         { label: "SUD-EST", deg: 135, aspect: -45 },
         { label: "SUD-OUEST", deg: 225, aspect: 45 },
       ];
-
-      let best = null;
-      let bestDiff = 9999;
+      let best = null, bestDiff = 9999;
       for (let t of targets) {
-        // difference
         let diff = Math.abs(angle - t.deg);
-        // tenir compte du wrap 360
         if (diff > 180) diff = 360 - diff;
         if (diff < bestDiff) {
           bestDiff = diff;
           best = t;
         }
       }
-      return best; // ex => { label: "SUD", deg: 180, aspect: 0 }
+      return best;
     }
 
-    // Leaflet Draw : quand un objet est créé
+    // Leaflet Draw : un objet est créé
     map.on(L.Draw.Event.CREATED, function (e) {
       const layer = e.layer;
       drawnItems.addLayer(layer);
 
       if (e.layerType === 'polygon' || e.layerType === 'rectangle') {
-        // on calcule la surface, comme avant
+        // Calculer surface
         let latLngs = layer.getLatLngs();
         if (Array.isArray(latLngs[0])) {
           latLngs = latLngs[0];
@@ -692,35 +738,31 @@
         const areaRounded = Math.round(area * 100) / 100;
         alert(`Surface mesurée : ${areaRounded} m²`);
         document.getElementById("Surface toiture").value = areaRounded;
-      }
-      else if (e.layerType === 'polyline') {
+        // Actualiser potentiel
+        updateProductionPotential();
+      } else if (e.layerType === 'polyline') {
         // => "flèche" pour orientation
         const latLngs = layer.getLatLngs();
         if (latLngs.length < 2) {
-          alert("Dessinez une ligne avec au moins 2 points...");
+          alert("Tracez au moins 2 points pour la ligne d'orientation.");
           return;
         }
-
-        // On prend le premier point et le dernier point
         const first = latLngs[0];
         const last = latLngs[latLngs.length - 1];
 
-        // Calcul bearing
         const angle = computeBearing(first.lat, first.lng, last.lat, last.lng);
         const aspectObj = mapAngleToAspect(angle);
-
         if (aspectObj) {
-          // On met à jour la <select> "orientationIrr"
           document.getElementById("orientationIrr").value = aspectObj.aspect.toString();
           alert(`Orientation déterminée: ${aspectObj.label} (aspect=${aspectObj.aspect})`);
         }
-        // Optionnel : supprimer la ligne "flèche" qu'on vient de tracer
+        // Optionnel: retirer la ligne
         drawnItems.removeLayer(layer);
       }
     });
 
     /***************************************************
-     * 3) RECHERCHE D'ADRESSE (Nominatim) + MARKER
+     * 3) RECHERCHE D'ADRESSE (Nominatim) + MARQUEUR
      ***************************************************/
     async function searchAddress(event) {
       event.preventDefault();
@@ -734,20 +776,19 @@
           const { lat, lon } = data[0];
           map.setView([lat, lon], 18);
           AdresseField.value = address;
-          // Marqueur
-          if (searchMarker) {
-            map.removeLayer(searchMarker);
-          }
+
+          if (searchMarker) map.removeLayer(searchMarker);
           searchMarker = L.marker([lat, lon]).addTo(map);
           searchMarker.bindPopup(`Adresse trouvée : ${address}`).openPopup();
-          // Mettre à jour lat/lon
+
+          // MAJ lat/lon
           document.getElementById("latitudeIrr").value = lat;
           document.getElementById("longitudeIrr").value = lon;
         } else {
           alert("Adresse introuvable.");
         }
       } catch (error) {
-        console.error("Erreur lors de la recherche de l'adresse :", error);
+        console.error("Erreur recherche adresse:", error);
         alert("Une erreur est survenue lors de la recherche de l'adresse.");
       }
     }
@@ -776,13 +817,14 @@
         return null;
       }
     }
+
     document.getElementById("calculateIrrButton").addEventListener("click", async () => {
       const lat = parseFloat(document.getElementById("latitudeIrr").value);
       const lon = parseFloat(document.getElementById("longitudeIrr").value);
       const aspectValue = parseFloat(document.getElementById("orientationIrr").value);
 
       if (isNaN(lat) || isNaN(lon)) {
-        alert("Veuillez d'abord renseigner la latitude et la longitude (faire une recherche d'adresse).");
+        alert("Veuillez d'abord renseigner la latitude et la longitude (recherchez une adresse).");
         return;
       }
       const result = await getProductible(lat, lon, aspectValue);
@@ -791,7 +833,54 @@
       } else {
         alert("Impossible de récupérer le productible. Vérifiez la connexion ou les données.");
       }
+      updateProductionPotential();
     });
+
+    /***************************************************
+     * 3C) CALCUL "POTENTIEL DE PRODUCTION"
+     ***************************************************/
+    function updateProductionPotential() {
+      // Champs à lire
+      const surfaceStr = document.getElementById("Surface toiture").value;
+      const exclStr = document.getElementById("exclusionPercent").value;
+      const panelPowerStr = document.getElementById("puissancePanneau").value;
+      const productibleStr = document.getElementById("productible").value;
+
+      const surface = parseFloat(surfaceStr) || 0;
+      const exclusionPercent = parseFloat(exclStr) || 0;
+      const panelPower = parseFloat(panelPowerStr) || 420; // Wc
+      const productibleVal = parseFloat(productibleStr) || 0;
+
+      // Calcul surface utile
+      const surfaceUtile = surface * (1 - (exclusionPercent / 100));
+      // Nombre de panneaux (2 m² / panneau)
+      const nbPanels = Math.floor(surfaceUtile / 2);
+      // Puissance max PV
+      const puissanceMax = nbPanels * panelPower; // en Wc
+      // Production en kWh = (puissanceMax(Wc)/1000) * productible(kWh/kWc/an) ?
+      // Si 'productible' est déjà en kWh/kWc, alors
+      // production = (puissanceMax/1000) * productibleVal
+      // OU si productible = kWh par Wc, on multiplie direct
+      // Mais d'après code existant, l'API PVGIS renvoie kWh/kWp => on fait:
+      const production = (puissanceMax / 1000) * productibleVal; // en kWh/an
+
+      // On met à jour
+      document.getElementById("nombrePVMax").value = nbPanels.toString();
+      document.getElementById("puissanceMaxPV").value = puissanceMax.toString();
+      document.getElementById("productionInstall").value = production.toFixed(2);
+    }
+
+    // On veut recalculer automatiquement quand l'utilisateur change la surface,
+    // le % d'exclusion, la puissance panneau, ou le productible
+    const surfaceInput = document.getElementById("Surface toiture");
+    const exclInput = document.getElementById("exclusionPercent");
+    const panelSelect = document.getElementById("puissancePanneau");
+    const productibleInput = document.getElementById("productible");
+
+    surfaceInput.addEventListener("input", updateProductionPotential);
+    exclInput.addEventListener("input", updateProductionPotential);
+    panelSelect.addEventListener("change", updateProductionPotential);
+    productibleInput.addEventListener("input", updateProductionPotential);
 
     /***************************************************
      * 4) EXPORT PDF (2 PAGES)
@@ -807,6 +896,7 @@
         const mapImage = canvas.toDataURL("image/png");
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF();
+
         pdf.addImage(mapImage, "PNG", 10, 10, 190, 100);
 
         let yOffset = 120;
@@ -850,7 +940,6 @@
 
       const formObject = {};
       rawFormData.forEach((value, key) => {
-        // Si la clé existe déjà => c'est un tableau
         if (formObject[key] !== undefined) {
           if (!Array.isArray(formObject[key])) {
             formObject[key] = [formObject[key]];
@@ -867,7 +956,7 @@
       formObject["mapZoom"] = map.getZoom();
       formObject["canvasImage"] = drawingCanvas.toDataURL();
 
-      // Sauvegarde des polygones/rectangles (et polylines) Leaflet Draw
+      // Polygones/rectangles/lines
       const shapesGeoJSON = drawnItems.toGeoJSON();
       formObject["drawnShapes"] = shapesGeoJSON;
 
@@ -904,7 +993,9 @@
             if (Array.isArray(dataValue)) {
               dataValue.forEach((val) => {
                 const checkbox = form.querySelector(`[name="${key}"][value="${val}"]`);
-                if (checkbox) checkbox.checked = true;
+                if (checkbox) {
+                  checkbox.checked = true;
+                }
               });
             } else {
               const input = form.querySelector(`[name="${key}"]`);
@@ -914,7 +1005,7 @@
             }
           });
 
-          // Recentrer la carte
+          // Restaure la carte
           if (
             jsonData["mapCenterLat"] !== undefined &&
             jsonData["mapCenterLng"] !== undefined &&
@@ -923,7 +1014,7 @@
             map.setView([jsonData["mapCenterLat"], jsonData["mapCenterLng"]], jsonData["mapZoom"]);
           }
 
-          // Restauration du dessin (canvas)
+          // Restaure le canvas
           if (jsonData["canvasImage"]) {
             const image = new Image();
             image.onload = function () {
@@ -933,7 +1024,7 @@
             image.src = jsonData["canvasImage"];
           }
 
-          // Restauration des polygones (etc.)
+          // Restaure formes
           if (jsonData["drawnShapes"]) {
             drawnItems.clearLayers();
             L.geoJson(jsonData["drawnShapes"]).eachLayer(function(layer) {
@@ -941,10 +1032,13 @@
             });
           }
 
-          // Recalculer le tableau (coût/kWh)
+          // Recalcule le tableau de consommation
           for (let i = 0; i < 12; i++) {
             calculateCost(i);
           }
+
+          // Recalcule le potentiel
+          updateProductionPotential();
         };
         reader.readAsText(file);
       }
