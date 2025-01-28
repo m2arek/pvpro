@@ -257,7 +257,7 @@
     <button id="toggleDrawingButton">Activer le dessin (main levée)</button>
     <button id="toggleMeasureButton">Mesurer une surface</button>
 
-    <!-- 3) Zone carte + canvas -->
+    <!-- (3) Zone carte + canvas -->
     <div id="map-container">
       <div id="map"></div>
       <canvas id="drawingCanvas"></canvas>
@@ -291,7 +291,7 @@
         <button type="button" id="calculateIrrButton">Calculer le productible</button>
       </div>
 
-      <!-- NOUVEAU BLOC : "Potentiel de production" -->
+      <!-- BLOC "Potentiel de production" -->
       <div class="form-section">
         <h3>Potentiel de production</h3>
 
@@ -312,13 +312,13 @@
         </select>
 
         <label for="nombrePVMax">Nombre de PV max :</label>
-        <input type="number" id="nombrePVMax" name="nombrePVMax" readonly />
+        <input type="text" id="nombrePVMax" name="nombrePVMax" readonly />
 
-        <label for="puissanceMaxPV">Puissance max PV (Wc) :</label>
-        <input type="number" id="puissanceMaxPV" name="puissanceMaxPV" readonly />
+        <label for="puissanceMaxPV">Puissance max PV (kWc) :</label>
+        <input type="text" id="puissanceMaxPV" name="puissanceMaxPV" readonly />
 
         <label for="productionInstall">Production en kWh de l'installation :</label>
-        <input type="number" id="productionInstall" name="productionInstall" readonly />
+        <input type="text" id="productionInstall" name="productionInstall" readonly />
       </div>
 
       <!-- 4.1) Informations société -->
@@ -558,8 +558,11 @@
               totalKwh += kwhVal;
             }
             const averageCostPerKwh = totalKwh > 0 ? (totalEuros / totalKwh).toFixed(2) : "-";
-            document.getElementById("totalEuros").textContent = totalEuros.toFixed(2) + " €";
-            document.getElementById("totalKwh").textContent = totalKwh.toFixed(2) + " kWh";
+
+            document.getElementById("totalEuros").textContent = 
+              totalEuros.toFixed(2).toLocaleString('fr-FR') + " €";
+            document.getElementById("totalKwh").textContent = 
+              totalKwh.toFixed(2).toLocaleString('fr-FR') + " kWh";
             document.getElementById("totalCostPerKwh").textContent =
               totalKwh > 0 ? `${averageCostPerKwh} €` : "-";
           }
@@ -589,7 +592,7 @@
 
   <script>
     /***************************************************
-     * 1) INITIALISER LA CARTE LEAFLET (Google Satellite)
+     * 1) INITIALISER LA CARTE (Google Satellite)
      ***************************************************/
     const map = L.map("map").setView([48.8566, 2.3522], 18);
     const tileLayer = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
@@ -602,7 +605,7 @@
     let searchMarker = null;
 
     /***************************************************
-     * 2) DESSIN LIBRE SUR CANVAS (main levée)
+     * 2) DESSIN LIBRE SUR CANVAS
      ***************************************************/
     const drawingCanvas = document.getElementById("drawingCanvas");
     const ctx = drawingCanvas.getContext("2d");
@@ -650,18 +653,17 @@
       const rect = drawingCanvas.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
-
       ctx.lineTo(x, y);
       ctx.stroke();
     });
 
     /***************************************************
-     * A) OUTILS DE MESURE/DESSIN LEAFLET DRAW
+     * A) OUTILS LEAFLET DRAW
      ***************************************************/
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
 
-    // On autorise polygon, rectangle, polyline
+    // Polygon, rectangle, polyline autorisés
     const drawControl = new L.Control.Draw({
       draw: {
         marker: false,
@@ -677,23 +679,22 @@
     });
 
     let measureActive = false;
-    const measureButton = document.getElementById('toggleMeasureButton');
-    measureButton.addEventListener('click', () => {
+    const measureButton = document.getElementById("toggleMeasureButton");
+    measureButton.addEventListener("click", () => {
       measureActive = !measureActive;
       if (measureActive) {
         map.addControl(drawControl);
-        measureButton.textContent = 'Terminer la mesure';
+        measureButton.textContent = "Terminer la mesure";
       } else {
         map.removeControl(drawControl);
-        measureButton.textContent = 'Mesurer une surface';
+        measureButton.textContent = "Mesurer une surface";
       }
     });
 
-    // Calcul du bearing
+    // Calcul bearing
     function computeBearing(lat1, lng1, lat2, lng2) {
       const toRad = (val) => val * Math.PI / 180;
       const toDeg = (val) => val * 180 / Math.PI;
-
       const dLon = toRad(lng2 - lng1);
       const y = Math.sin(dLon) * Math.cos(toRad(lat2));
       const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2))
@@ -723,25 +724,25 @@
       return best;
     }
 
-    // Leaflet Draw : un objet est créé
     map.on(L.Draw.Event.CREATED, function (e) {
       const layer = e.layer;
       drawnItems.addLayer(layer);
 
-      if (e.layerType === 'polygon' || e.layerType === 'rectangle') {
-        // Calculer surface
+      if (e.layerType === "polygon" || e.layerType === "rectangle") {
+        // Calcul surface
         let latLngs = layer.getLatLngs();
         if (Array.isArray(latLngs[0])) {
           latLngs = latLngs[0];
         }
         const area = L.GeometryUtil.geodesicArea(latLngs);
-        const areaRounded = Math.round(area * 100) / 100;
-        alert(`Surface mesurée : ${areaRounded} m²`);
-        document.getElementById("Surface toiture").value = areaRounded;
-        // Actualiser potentiel
+        // on arrondit + format milliers
+        const areaInt = Math.round(area);
+        const formattedArea = areaInt.toLocaleString('fr-FR');
+        alert(`Surface mesurée : ${formattedArea} m²`);
+        document.getElementById("Surface toiture").value = formattedArea;
         updateProductionPotential();
-      } else if (e.layerType === 'polyline') {
-        // => "flèche" pour orientation
+      } else if (e.layerType === "polyline") {
+        // => orientation
         const latLngs = layer.getLatLngs();
         if (latLngs.length < 2) {
           alert("Tracez au moins 2 points pour la ligne d'orientation.");
@@ -749,20 +750,19 @@
         }
         const first = latLngs[0];
         const last = latLngs[latLngs.length - 1];
-
         const angle = computeBearing(first.lat, first.lng, last.lat, last.lng);
         const aspectObj = mapAngleToAspect(angle);
         if (aspectObj) {
           document.getElementById("orientationIrr").value = aspectObj.aspect.toString();
           alert(`Orientation déterminée: ${aspectObj.label} (aspect=${aspectObj.aspect})`);
         }
-        // Optionnel: retirer la ligne
+        // Retirer la ligne si on veut
         drawnItems.removeLayer(layer);
       }
     });
 
     /***************************************************
-     * 3) RECHERCHE D'ADRESSE (Nominatim) + MARQUEUR
+     * 3) RECHERCHE D'ADRESSE + MARQUEUR
      ***************************************************/
     async function searchAddress(event) {
       event.preventDefault();
@@ -777,11 +777,12 @@
           map.setView([lat, lon], 18);
           AdresseField.value = address;
 
-          if (searchMarker) map.removeLayer(searchMarker);
+          if (searchMarker) {
+            map.removeLayer(searchMarker);
+          }
           searchMarker = L.marker([lat, lon]).addTo(map);
           searchMarker.bindPopup(`Adresse trouvée : ${address}`).openPopup();
 
-          // MAJ lat/lon
           document.getElementById("latitudeIrr").value = lat;
           document.getElementById("longitudeIrr").value = lon;
         } else {
@@ -794,25 +795,24 @@
     }
 
     /***************************************************
-     * 3B) CALCUL DU PRODUCTIBLE (API PVGIS)
+     * 3B) CALCUL PRODUCTIBLE (API PVGIS)
      ***************************************************/
     async function getProductible(lat, lon, aspectValue) {
       const originalUrl = `https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?outputformat=basic&lat=${lat}&lon=${lon}&raddatabase=PVGIS-SARAH2&peakpower=1&loss=14&pvtechchoice=crystSi&angle=35&aspect=${aspectValue}&usehorizon=1`;
       const proxyUrl = `https://corsproxy.io/?key=a32495b2&url=${encodeURIComponent(originalUrl)}`;
-
       try {
         const response = await fetch(proxyUrl);
         if (!response.ok) return null;
         const text = await response.text();
-        const lines = text.split('\n');
+        const lines = text.split("\n");
         for (let line of lines) {
           if (line.includes("Year")) {
-            const parts = line.split('\t');
+            const parts = line.split("\t");
             return parseFloat(parts[1]);
           }
         }
         return null;
-      } catch(e) {
+      } catch (e) {
         console.error(e);
         return null;
       }
@@ -824,12 +824,12 @@
       const aspectValue = parseFloat(document.getElementById("orientationIrr").value);
 
       if (isNaN(lat) || isNaN(lon)) {
-        alert("Veuillez d'abord renseigner la latitude et la longitude (recherchez une adresse).");
+        alert("Veuillez d'abord renseigner la latitude et la longitude (recherche d'adresse).");
         return;
       }
       const result = await getProductible(lat, lon, aspectValue);
       if (result !== null) {
-        document.getElementById("productible").value = result.toString();
+        document.getElementById("productible").value = result.toLocaleString('fr-FR');
       } else {
         alert("Impossible de récupérer le productible. Vérifiez la connexion ou les données.");
       }
@@ -840,38 +840,36 @@
      * 3C) CALCUL "POTENTIEL DE PRODUCTION"
      ***************************************************/
     function updateProductionPotential() {
-      // Champs à lire
-      const surfaceStr = document.getElementById("Surface toiture").value;
+      const surfaceStr = document.getElementById("Surface toiture").value.replace(/\s/g, "").replace(/\./g, "").replace(/,/g, "");
       const exclStr = document.getElementById("exclusionPercent").value;
       const panelPowerStr = document.getElementById("puissancePanneau").value;
-      const productibleStr = document.getElementById("productible").value;
+      const productibleStr = document.getElementById("productible").value.replace(/\s/g, "").replace(/\./g, "").replace(/,/g, ".");
 
       const surface = parseFloat(surfaceStr) || 0;
       const exclusionPercent = parseFloat(exclStr) || 0;
       const panelPower = parseFloat(panelPowerStr) || 420; // Wc
       const productibleVal = parseFloat(productibleStr) || 0;
 
-      // Calcul surface utile
+      // Surface utile
       const surfaceUtile = surface * (1 - (exclusionPercent / 100));
-      // Nombre de panneaux (2 m² / panneau)
+      // Nombre panneaux => 2 m²/panneau
       const nbPanels = Math.floor(surfaceUtile / 2);
-      // Puissance max PV
-      const puissanceMax = nbPanels * panelPower; // en Wc
-      // Production en kWh = (puissanceMax(Wc)/1000) * productible(kWh/kWc/an) ?
-      // Si 'productible' est déjà en kWh/kWc, alors
-      // production = (puissanceMax/1000) * productibleVal
-      // OU si productible = kWh par Wc, on multiplie direct
-      // Mais d'après code existant, l'API PVGIS renvoie kWh/kWp => on fait:
-      const production = (puissanceMax / 1000) * productibleVal; // en kWh/an
 
-      // On met à jour
-      document.getElementById("nombrePVMax").value = nbPanels.toString();
-      document.getElementById("puissanceMaxPV").value = puissanceMax.toString();
-      document.getElementById("productionInstall").value = production.toFixed(2);
+      // Puissance max en Wc => converti en kWc
+      const puissanceMaxW = nbPanels * panelPower;
+      const puissanceMaxKW = Math.round(puissanceMaxW / 1000);
+
+      // Production en kWh = puissanceMax(kWc) * productible (kWh/kWc)
+      // On arrondit l'entier
+      const production = Math.round(puissanceMaxKW * productibleVal);
+
+      // On applique le séparateur de milliers
+      document.getElementById("nombrePVMax").value = nbPanels.toLocaleString('fr-FR');
+      document.getElementById("puissanceMaxPV").value = puissanceMaxKW.toLocaleString('fr-FR');
+      document.getElementById("productionInstall").value = production.toLocaleString('fr-FR');
     }
 
-    // On veut recalculer automatiquement quand l'utilisateur change la surface,
-    // le % d'exclusion, la puissance panneau, ou le productible
+    // On recalcule quand l’utilisateur modifie ces champs
     const surfaceInput = document.getElementById("Surface toiture");
     const exclInput = document.getElementById("exclusionPercent");
     const panelSelect = document.getElementById("puissancePanneau");
@@ -956,7 +954,7 @@
       formObject["mapZoom"] = map.getZoom();
       formObject["canvasImage"] = drawingCanvas.toDataURL();
 
-      // Polygones/rectangles/lines
+      // Polygones
       const shapesGeoJSON = drawnItems.toGeoJSON();
       formObject["drawnShapes"] = shapesGeoJSON;
 
@@ -1024,7 +1022,7 @@
             image.src = jsonData["canvasImage"];
           }
 
-          // Restaure formes
+          // Restaure les formes
           if (jsonData["drawnShapes"]) {
             drawnItems.clearLayers();
             L.geoJson(jsonData["drawnShapes"]).eachLayer(function(layer) {
@@ -1032,12 +1030,11 @@
             });
           }
 
-          // Recalcule le tableau de consommation
+          // Recalc table
           for (let i = 0; i < 12; i++) {
             calculateCost(i);
           }
-
-          // Recalcule le potentiel
+          // Recalc potentiel
           updateProductionPotential();
         };
         reader.readAsText(file);
