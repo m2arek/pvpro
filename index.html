@@ -656,14 +656,17 @@
       }
     });
 
-    // Lorsqu'une forme est créée (polygone ou rectangle)
+    // CORRECTION : Gérer polygones ET rectangles
     map.on(L.Draw.Event.CREATED, function (e) {
       const layer = e.layer;
       drawnItems.addLayer(layer);
 
       if (e.layerType === 'polygon' || e.layerType === 'rectangle') {
-        // Récupérer les LatLng
-        const latLngs = layer.getLatLngs()[0];
+        // Récupérer les coord. (premier anneau)
+        let latLngs = layer.getLatLngs();
+        if (Array.isArray(latLngs[0])) {
+          latLngs = latLngs[0]; // On prend le 1er tableau de sommets
+        }
         const area = L.GeometryUtil.geodesicArea(latLngs); // en m²
         const areaRounded = Math.round(area * 100) / 100;
 
