@@ -249,7 +249,7 @@
 
 <body>
   <div class="container">
-    <h1 class="page-title">Le Formulaire pour saisie données FRH PRO</h1>
+    <h1 class="page-title">Formulaire pour saisie données FRH PRO</h1>
 
     <!-- (1) Formulaire de recherche d'adresse -->
     <form id="addressForm" onsubmit="return searchAddress(event);">
@@ -276,6 +276,32 @@
 
     <!-- (4) Formulaire principal -->
     <form id="userForm">
+
+      <!-- NOUVEAU BLOC : Données irradiation -->
+      <div class="form-section">
+        <h3>Données irradiation</h3>
+
+        <label for="latitudeIrr">Latitude :</label>
+        <input type="text" id="latitudeIrr" name="latitudeIrr" readonly />
+
+        <label for="longitudeIrr">Longitude :</label>
+        <input type="text" id="longitudeIrr" name="longitudeIrr" readonly />
+
+        <label for="orientationIrr">Orientation :</label>
+        <select id="orientationIrr" name="orientationIrr">
+          <option value="0">SUD (0°)</option>
+          <option value="-90">EST (-90°)</option>
+          <option value="90">OUEST (90°)</option>
+          <option value="-45">SUD-EST (-45°)</option>
+          <option value="45">SUD-OUEST (45°)</option>
+        </select>
+
+        <label for="productible">Productible :</label>
+        <input type="text" id="productible" name="productible" placeholder="kWh/kWc/an" readonly/>
+
+        <!-- Bouton pour lancer le calcul du productible -->
+        <button type="button" id="calculateIrrButton">Calculer le productible</button>
+      </div>
 
       <!-- 4.1) Informations société -->
       <div class="form-section">
@@ -689,7 +715,7 @@
     });
 
     /***************************************************
-     * 3) RECHERCHE D'ADRESSE (Nominatim) + MARKER
+     * 3) RECHERCHE D'ADRESSE (Nominatim) + MARQUEUR
      ***************************************************/
     async function searchAddress(event) {
       event.preventDefault();
@@ -706,13 +732,16 @@
           map.setView([lat, lon], 18);
           AdresseField.value = address; // Sauvegarder l'adresse dans le formulaire
 
-          // SUPPRIMER L'ANCIEN MARQUEUR SI EXISTE
+          // Placer un marqueur à l'adresse recherchée
           if (searchMarker) {
             map.removeLayer(searchMarker);
           }
-          // CREER UN NOUVEAU MARQUEUR
           searchMarker = L.marker([lat, lon]).addTo(map);
           searchMarker.bindPopup(`Adresse trouvée : ${address}`).openPopup();
+
+          // Mettre à jour les champs lat/lon du bloc "Données irradiation"
+          document.getElementById("latitudeIrr").value = lat;
+          document.getElementById("longitudeIrr").value = lon;
 
         } else {
           alert("Adresse introuvable.");
@@ -722,6 +751,50 @@
         alert("Une erreur est survenue lors de la recherche de l'adresse.");
       }
     }
+
+    /***************************************************
+     * 3B) CALCUL DU PRODUCTIBLE (API PVGIS)
+     ***************************************************/
+    async function getProductible(lat, lon, aspectValue) {
+      const originalUrl = `https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?outputformat=basic&lat=${lat}&lon=${lon}&raddatabase=PVGIS-SARAH2&peakpower=1&loss=14&pvtechchoice=crystSi&angle=35&aspect=${aspectValue}&usehorizon=1`;
+      // Passage par un proxy CORS
+      const proxyUrl = `https://corsproxy.io/?key=a32495b2&url=${encodeURIComponent(originalUrl)}`;
+
+      try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) return null;
+        const text = await response.text();
+        const lines = text.split('\n');
+        for (let line of lines) {
+          if (line.includes("Year")) {
+            const parts = line.split('\t');
+            return parseFloat(parts[1]);
+          }
+        }
+        return null;
+      } catch(e) {
+        console.error(e);
+        return null;
+      }
+    }
+
+    // Bouton pour déclencher le calcul du productible
+    document.getElementById("calculateIrrButton").addEventListener("click", async () => {
+      const lat = parseFloat(document.getElementById("latitudeIrr").value);
+      const lon = parseFloat(document.getElementById("longitudeIrr").value);
+      const aspectValue = parseFloat(document.getElementById("orientationIrr").value);
+
+      if (isNaN(lat) || isNaN(lon)) {
+        alert("Veuillez d'abord renseigner la latitude et la longitude (faire une recherche d'adresse).");
+        return;
+      }
+      const result = await getProductible(lat, lon, aspectValue);
+      if (result !== null) {
+        document.getElementById("productible").value = result.toString();
+      } else {
+        alert("Impossible de récupérer le productible. Vérifiez la connexion ou les données.");
+      }
+    });
 
     /***************************************************
      * 4) EXPORT PDF (2 PAGES)
