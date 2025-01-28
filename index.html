@@ -663,7 +663,6 @@
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
 
-    // Polygon, rectangle, polyline autorisés
     const drawControl = new L.Control.Draw({
       draw: {
         marker: false,
@@ -724,25 +723,27 @@
       return best;
     }
 
+    // ***** ICI : ON N'INSÈRE PAS d'espace dans "Surface toiture" *****
     map.on(L.Draw.Event.CREATED, function (e) {
       const layer = e.layer;
       drawnItems.addLayer(layer);
 
       if (e.layerType === "polygon" || e.layerType === "rectangle") {
-        // Calcul surface
         let latLngs = layer.getLatLngs();
         if (Array.isArray(latLngs[0])) {
           latLngs = latLngs[0];
         }
         const area = L.GeometryUtil.geodesicArea(latLngs);
-        // on arrondit + format milliers
         const areaInt = Math.round(area);
-        const formattedArea = areaInt.toLocaleString('fr-FR');
-        alert(`Surface mesurée : ${formattedArea} m²`);
-        document.getElementById("Surface toiture").value = formattedArea;
+
+        // On peut afficher la version formatée dans l'alerte :
+        alert(`Surface mesurée : ${areaInt.toLocaleString('fr-FR')} m²`);
+
+        // Mais dans le champ, on met la valeur brute (pas d'espace insécable)
+        document.getElementById("Surface toiture").value = areaInt;
+
         updateProductionPotential();
       } else if (e.layerType === "polyline") {
-        // => orientation
         const latLngs = layer.getLatLngs();
         if (latLngs.length < 2) {
           alert("Tracez au moins 2 points pour la ligne d'orientation.");
@@ -840,10 +841,16 @@
      * 3C) CALCUL "POTENTIEL DE PRODUCTION"
      ***************************************************/
     function updateProductionPotential() {
-      const surfaceStr = document.getElementById("Surface toiture").value.replace(/\s/g, "").replace(/\./g, "").replace(/,/g, "");
+      const surfaceStr = document.getElementById("Surface toiture").value
+        .replace(/\s/g, "") // on supprime les espaces éventuels (juste au cas où)
+        .replace(/\./g, "")
+        .replace(/,/g, "");
       const exclStr = document.getElementById("exclusionPercent").value;
       const panelPowerStr = document.getElementById("puissancePanneau").value;
-      const productibleStr = document.getElementById("productible").value.replace(/\s/g, "").replace(/\./g, "").replace(/,/g, ".");
+      const productibleStr = document.getElementById("productible").value
+        .replace(/\s/g, "")
+        .replace(/\./g, "")
+        .replace(/,/g, ".");
 
       const surface = parseFloat(surfaceStr) || 0;
       const exclusionPercent = parseFloat(exclStr) || 0;
@@ -859,11 +866,10 @@
       const puissanceMaxW = nbPanels * panelPower;
       const puissanceMaxKW = Math.round(puissanceMaxW / 1000);
 
-      // Production en kWh = puissanceMax(kWc) * productible (kWh/kWc)
-      // On arrondit l'entier
+      // Production en kWh = puissanceMax(kWc) * productible (kWh/kWc/an)
       const production = Math.round(puissanceMaxKW * productibleVal);
 
-      // On applique le séparateur de milliers
+      // On applique le séparateur de milliers pour l'affichage final
       document.getElementById("nombrePVMax").value = nbPanels.toLocaleString('fr-FR');
       document.getElementById("puissanceMaxPV").value = puissanceMaxKW.toLocaleString('fr-FR');
       document.getElementById("productionInstall").value = production.toLocaleString('fr-FR');
