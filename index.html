@@ -641,7 +641,7 @@
     });
 
     function fetchSuggestions(query) {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=${MAX_SUGGESTIONS}&q=${encodeURIComponent(query)}`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=${MAX_SUGGESTIONS}&countrycodes=fr&q=${encodeURIComponent(query)}`;
       fetch(url)
         .then(resp => resp.json())
         .then(data => {
